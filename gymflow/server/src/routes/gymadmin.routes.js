@@ -4,7 +4,7 @@ const {
   getClientes, crearCliente, actualizarCliente, eliminarCliente, toggleBloqueo, actualizarPlan, toggleActivo,
   getProfesores, crearProfesor, getAlumnosDeProfesor,
   getConfiguracion, actualizarConfiguracion,
-  getHorarios, crearHorario, actualizarHorario, eliminarHorario,
+  getHorarios, crearHorario, actualizarHorario, eliminarHorario, bulkHorarios,
   getDashboard, gestionarPago,
   getTurnos, marcarAsistencia,
   getSolicitudesPago, gestionarSolicitudPago,
@@ -31,6 +31,7 @@ router.get('/configuracion', soloAdminGym, getConfiguracion);
 router.put('/configuracion', soloAdminGym, actualizarConfiguracion);
 
 // Horarios
+router.post('/horarios/bulk', soloAdminGym, bulkHorarios);
 router.get('/horarios', adminOProfesor, getHorarios);
 router.post('/horarios', soloAdminGym, crearHorario);
 router.put('/horarios/:id', soloAdminGym, actualizarHorario);

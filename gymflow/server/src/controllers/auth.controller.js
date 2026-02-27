@@ -62,6 +62,7 @@ const loginGym = async (req, res) => {
 
     res.json({
       token,
+      debe_cambiar_password: usuario.debe_cambiar_password || false,
       usuario: {
         id: usuario.id,
         nombre: usuario.nombre,
@@ -71,6 +72,7 @@ const loginGym = async (req, res) => {
         plan: usuario.plan,
         bloqueado: usuario.bloqueado,
         fecha_vencimiento_pago: usuario.fecha_vencimiento_pago,
+        debe_cambiar_password: usuario.debe_cambiar_password || false,
         gimnasio_id: gym.id,
         gym_slug: gym.slug
       },
@@ -170,7 +172,7 @@ const cambiarPassword = async (req, res) => {
     if (result.rows.length === 0) return res.status(400).json({ error: 'Contraseña actual incorrecta' });
 
     await pool.query(
-      `UPDATE usuarios SET password_hash = crypt($1, gen_salt('bf', 10)) WHERE id = $2`,
+      `UPDATE usuarios SET password_hash = crypt($1, gen_salt('bf', 10)), debe_cambiar_password = false WHERE id = $2`,
       [passwordNueva, usuarioId]
     );
     res.json({ mensaje: 'Contraseña actualizada correctamente' });

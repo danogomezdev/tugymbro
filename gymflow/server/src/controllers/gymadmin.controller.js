@@ -228,7 +228,7 @@ const getConfiguracion = async (req, res) => {
   try {
     const [cfgResult, horariosResult] = await Promise.all([
       pool.query(
-        `SELECT c.*, g.nombre, g.slug, g.logo_url, g.color_primario, g.descripcion, g.instagram, g.whatsapp
+        `SELECT c.*, g.nombre, g.slug, g.logo_url, g.color_primario
          FROM configuracion_gym c
          JOIN gimnasios g ON g.id = c.gimnasio_id
          WHERE c.gimnasio_id = $1`,
@@ -252,43 +252,60 @@ const getConfiguracion = async (req, res) => {
 
 const actualizarConfiguracion = async (req, res) => {
   const {
-    precio_1dia, precio_2dias, precio_3dias, texto_bienvenida,
+    precio_1dia, precio_2dias, precio_3dias, precio_libre, texto_bienvenida,
     color_primario, descripcion, instagram, whatsapp,
     modo_acceso, capacidad_default, sin_limite_personas,
     planes_activos, plan_libre, alias_transferencia,
     nombre_titular, banco, abierto_24h, dias_abierto
   } = req.body;
   const gId = gymId(req);
+
+  // Convertir strings vacíos a null para columnas numéricas
+  const toNum = (v) => (v === '' || v === null || v === undefined) ? null : parseFloat(v);
+  const toInt = (v) => (v === '' || v === null || v === undefined) ? null : parseInt(v);
+
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
+
+    // Guardar configuración del gym
     await client.query(
       `INSERT INTO configuracion_gym (
-        gimnasio_id, precio_1dia, precio_2dias, precio_3dias, texto_bienvenida,
+        gimnasio_id, precio_1dia, precio_2dias, precio_3dias, precio_libre, texto_bienvenida,
         modo_acceso, capacidad_default, sin_limite_personas, planes_activos,
-        plan_libre, alias_transferencia, nombre_titular, banco, abierto_24h, dias_abierto
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+        plan_libre, alias_transferencia, nombre_titular, banco, abierto_24h, dias_abierto,
+        descripcion, instagram, whatsapp
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
        ON CONFLICT (gimnasio_id) DO UPDATE SET
-         precio_1dia=$2, precio_2dias=$3, precio_3dias=$4, texto_bienvenida=$5,
-         modo_acceso=$6, capacidad_default=$7, sin_limite_personas=$8, planes_activos=$9,
-         plan_libre=$10, alias_transferencia=$11, nombre_titular=$12, banco=$13,
-         abierto_24h=$14, dias_abierto=$15, actualizado_en=NOW()`,
-      [gId, precio_1dia, precio_2dias, precio_3dias, texto_bienvenida,
-       modo_acceso || 'horarios', capacidad_default || 20, sin_limite_personas || false,
-       planes_activos || ['2_dias','3_dias'], plan_libre || false,
-       alias_transferencia, nombre_titular, banco, abierto_24h || false,
-       dias_abierto || ['lunes','martes','miercoles','jueves','viernes']]
+         precio_1dia=$2, precio_2dias=$3, precio_3dias=$4, precio_libre=$5, texto_bienvenida=$6,
+         modo_acceso=$7, capacidad_default=$8, sin_limite_personas=$9, planes_activos=$10,
+         plan_libre=$11, alias_transferencia=$12, nombre_titular=$13, banco=$14,
+         abierto_24h=$15, dias_abierto=$16, descripcion=$17, instagram=$18, whatsapp=$19,
+         actualizado_en=NOW()`,
+      [
+        gId,
+        toNum(precio_1dia), toNum(precio_2dias), toNum(precio_3dias), toNum(precio_libre),
+        texto_bienvenida || null,
+        modo_acceso || 'horarios',
+        toInt(capacidad_default) || 20,
+        sin_limite_personas || false,
+        planes_activos || ['2_dias','3_dias'],
+        plan_libre || false,
+        alias_transferencia || null, nombre_titular || null, banco || null,
+        abierto_24h || false,
+        dias_abierto || ['lunes','martes','miercoles','jueves','viernes'],
+        descripcion || null, instagram || null, whatsapp || null
+      ]
     );
-    // Actualizar info del gimnasio
-    await client.query(
-      `UPDATE gimnasios SET
-         color_primario = COALESCE($1, color_primario),
-         descripcion = COALESCE($2, descripcion),
-         instagram = COALESCE($3, instagram),
-         whatsapp = COALESCE($4, whatsapp)
-       WHERE id = $5`,
-      [color_primario, descripcion, instagram, whatsapp, gId]
-    );
+
+    // Solo actualizar color_primario en gimnasios (columna que sí existe)
+    if (color_primario) {
+      await client.query(
+        `UPDATE gimnasios SET color_primario = $1 WHERE id = $2`,
+        [color_primario, gId]
+      );
+    }
+
     await client.query('COMMIT');
     res.json({ mensaje: 'Configuración actualizada correctamente' });
   } catch (error) {
@@ -355,6 +372,35 @@ const eliminarHorario = async (req, res) => {
     await pool.query(`DELETE FROM horarios WHERE id=$1 AND gimnasio_id=$2`, [id, gId]);
     res.json({ mensaje: 'Horario eliminado' });
   } catch { res.status(500).json({ error: 'Error al eliminar horario' }); }
+};
+
+const bulkHorarios = async (req, res) => {
+  const { slots } = req.body; // [{ dia_semana, hora_inicio, hora_fin, capacidad_maxima }]
+  const gId = gymId(req);
+  const client = await pool.connect();
+  try {
+    await client.query('BEGIN');
+    // Borrar todos los horarios actuales del gym
+    await client.query('DELETE FROM horarios WHERE gimnasio_id=$1', [gId]);
+    // Insertar los nuevos
+    if (slots && slots.length > 0) {
+      const values = slots.map((s, i) => {
+        const base = i * 4;
+        return `($${base+1},$${base+2},$${base+3},$${base+4},$${base+5})`;
+      }).join(',');
+      const params = slots.flatMap(s => [gId, s.dia_semana, s.hora_inicio, s.hora_fin, s.capacidad_maxima || 20]);
+      await client.query(
+        `INSERT INTO horarios (gimnasio_id, dia_semana, hora_inicio, hora_fin, capacidad_maxima) VALUES ${values}`,
+        params
+      );
+    }
+    await client.query('COMMIT');
+    res.json({ mensaje: `${slots?.length || 0} horarios guardados`, total: slots?.length || 0 });
+  } catch (error) {
+    await client.query('ROLLBACK');
+    console.error(error);
+    res.status(500).json({ error: 'Error al guardar horarios' });
+  } finally { client.release(); }
 };
 
 // =============================================
@@ -557,7 +603,7 @@ module.exports = {
   toggleBloqueo, actualizarPlan, toggleActivo,
   getProfesores, crearProfesor, getAlumnosDeProfesor,
   getConfiguracion, actualizarConfiguracion,
-  getHorarios, crearHorario, actualizarHorario, eliminarHorario,
+  getHorarios, crearHorario, actualizarHorario, eliminarHorario, bulkHorarios,
   getDashboard, gestionarPago,
   getTurnos, marcarAsistencia,
   getSolicitudesPago, gestionarSolicitudPago,
