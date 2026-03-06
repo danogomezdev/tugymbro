@@ -14,7 +14,7 @@ export default function GymRutinas() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
-    if (!gimnasio?.features?.rutinas) return setCargando(false);
+    if (!gimnasio?.feature_rutinas) return setCargando(false);
     api.get(`/gym/${gymSlug}/admin/clientes`)
       .then(r => setClientes(r.data.clientes))
       .catch(() => toast.error('Error'))

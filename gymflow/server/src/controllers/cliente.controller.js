@@ -52,21 +52,19 @@ const crearReserva = async (req, res) => {
       if (cfgResult.rows.length > 0) cfg = { ...cfg, ...cfgResult.rows[0] };
     } catch (e) { console.log('cfg query fallback:', e.message); }
 
-    // Verificar límite semanal
-    if (!cfg.plan_libre) {
-      const planLimites = { '1_dia':1,'2_dias':2,'3_dias':3,'4_dias':4,'5_dias':5,'libre':9999 };
-      const limite = planLimites[req.usuario.plan] || 3;
-      if (limite < 9999) {
-        const reservasSemana = await pool.query(
-          `SELECT COUNT(*) FROM reservas 
-           WHERE usuario_id=$1 AND gimnasio_id=$2 AND estado NOT IN ('cancelada')
-             AND fecha >= ($3::date - EXTRACT(ISODOW FROM $3::date)::int + 1)
-             AND fecha <= ($3::date - EXTRACT(ISODOW FROM $3::date)::int + 7)`,
-          [usuarioId, gimnasioId, fecha]
-        );
-        if (parseInt(reservasSemana.rows[0].count) >= limite)
-          return res.status(400).json({ error: `Ya tenés ${limite} clases reservadas para esa semana.` });
-      }
+    // Verificar límite semanal según el plan del USUARIO (no del gym)
+    const planLimites = { '1_dia':1,'2_dias':2,'3_dias':3,'4_dias':4,'5_dias':5,'libre':9999 };
+    const limite = planLimites[req.usuario.plan] || 3;
+    if (limite < 9999) {
+      const reservasSemana = await pool.query(
+        `SELECT COUNT(*) FROM reservas 
+         WHERE usuario_id=$1 AND gimnasio_id=$2 AND estado NOT IN ('cancelada')
+           AND fecha >= ($3::date - EXTRACT(ISODOW FROM $3::date)::int + 1)
+           AND fecha <= ($3::date - EXTRACT(ISODOW FROM $3::date)::int + 7)`,
+        [usuarioId, gimnasioId, fecha]
+      );
+      if (parseInt(reservasSemana.rows[0].count) >= limite)
+        return res.status(400).json({ error: `Ya tenés ${limite} clases reservadas para esa semana.` });
     }
 
     // Verificar capacidad
@@ -362,6 +360,17 @@ const getMisNotificaciones = async (req, res) => {
   }
 };
 
+const actualizarPerfil = async (req, res) => {
+  const { nombre, apellido, telefono } = req.body;
+  try {
+    await pool.query(
+      'UPDATE usuarios SET nombre=$1, apellido=$2, telefono=$3 WHERE id=$4',
+      [nombre, apellido, telefono, req.usuario.id]
+    );
+    res.json({ mensaje: 'Perfil actualizado' });
+  } catch { res.status(500).json({ error: 'Error' }); }
+};
+
 const getNotificacionesNoLeidas = async (req, res) => {
   const usuarioId = req.usuario.id;
   const gimnasioId = gId(req);
@@ -376,9 +385,27 @@ const getNotificacionesNoLeidas = async (req, res) => {
   }
 };
 
+const getMe = async (req, res) => {
+  const usuarioId = req.usuario.id;
+  const gimnasioId = gId(req);
+  try {
+    const result = await pool.query(
+      `SELECT id, nombre, apellido, email, rol, plan, telefono, bloqueado, 
+              fecha_vencimiento_pago, debe_cambiar_password
+       FROM usuarios WHERE id = $1 AND gimnasio_id = $2`,
+      [usuarioId, gimnasioId]
+    );
+    if (result.rows.length === 0) return res.status(404).json({ error: 'Usuario no encontrado' });
+    res.json({ usuario: result.rows[0] });
+  } catch (error) {
+    res.status(500).json({ error: 'Error al obtener usuario' });
+  }
+};
+
 module.exports = {
   misReservas, crearReserva, cancelarReserva, disponibilidad,
   getConfiguracion, solicitarPlan,
   getMisAusencias, solicitarRecupero,
-  getMisNotificaciones, getNotificacionesNoLeidas
+  getMisNotificaciones, getNotificacionesNoLeidas,
+  actualizarPerfil, getMe
 };

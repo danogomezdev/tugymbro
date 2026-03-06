@@ -4,12 +4,15 @@ const {
   misReservas, crearReserva, cancelarReserva, disponibilidad,
   getConfiguracion, solicitarPlan,
   getMisAusencias, solicitarRecupero,
-  getMisNotificaciones, getNotificacionesNoLeidas
+  getMisNotificaciones, getNotificacionesNoLeidas, actualizarPerfil, getMe
 } = require('../controllers/cliente.controller');
 const { verificarToken, verificarGimnasio, verificarPertenencia } = require('../middleware/auth.middleware');
 const upload = require('../config/multer');
 
 router.use(verificarToken, verificarGimnasio, verificarPertenencia);
+
+router.get('/me', getMe);
+
 
 // Reservas
 router.get('/reservas', misReservas);
@@ -28,5 +31,7 @@ router.post('/recupero/solicitar', solicitarRecupero);
 // Notificaciones
 router.get('/notificaciones', getMisNotificaciones);
 router.get('/notificaciones/no-leidas', getNotificacionesNoLeidas);
+
+router.put('/perfil', actualizarPerfil);
 
 module.exports = router;

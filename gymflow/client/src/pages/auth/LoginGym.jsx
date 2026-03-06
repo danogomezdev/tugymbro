@@ -12,10 +12,9 @@ export default function LoginGym() {
   const [password, setPassword] = useState('');
   const [verPass, setVerPass] = useState(false);
   const [cargando, setCargando] = useState(false);
-  const { loginGym, usuario } = useAuth();
+  const { loginGym, usuario, cargando: authCargando } = useAuth();
   const navigate = useNavigate();
 
-  // Estado para forzar cambio de contraseña
   const [debeCambiar, setDebeCambiar] = useState(false);
   const [nuevaPass, setNuevaPass] = useState('');
   const [confirmarPass, setConfirmarPass] = useState('');
@@ -23,25 +22,30 @@ export default function LoginGym() {
   const [tokenTemp, setTokenTemp] = useState(null);
   const [usuarioTemp, setUsuarioTemp] = useState(null);
 
+  // Cargar datos del gym
   useEffect(() => {
-    if (usuario) {
-      if (usuario.rol === 'admin_gym' || usuario.rol === 'profesor') {
-        navigate(`/gym/${gymSlug}/admin`);
-      } else {
-        navigate(`/gym/${gymSlug}`);
-      }
-    }
     api.get(`/public/gym/${gymSlug}`)
       .then(r => setGym(r.data.gym))
       .catch(() => toast.error('Gimnasio no encontrado'));
-  }, [gymSlug, usuario]);
+  }, [gymSlug]);
+
+  // Redirigir si ya está logueado — solo cuando auth terminó de cargar
+  useEffect(() => {
+    if (authCargando) return;
+    if (!usuario) return;
+    if (!gymSlug) return;
+    if (usuario.rol === 'admin_gym' || usuario.rol === 'profesor') {
+      navigate(`/gym/${gymSlug}/admin`);
+    } else {
+      navigate(`/gym/${gymSlug}/home`);
+    }
+  }, [usuario, authCargando, gymSlug]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setCargando(true);
     try {
       const data = await loginGym(email, password, gymSlug);
-      // Chequear si debe cambiar contraseña ANTES de navegar
       if (data.debe_cambiar_password || data.usuario?.debe_cambiar_password) {
         setTokenTemp(data.token);
         setUsuarioTemp(data.usuario);
@@ -51,10 +55,11 @@ export default function LoginGym() {
       if (data.usuario.rol === 'admin_gym' || data.usuario.rol === 'profesor') {
         navigate(`/gym/${gymSlug}/admin`);
       } else {
-        navigate(`/gym/${gymSlug}`);
+        navigate(`/gym/${gymSlug}/home`);
       }
     } catch (err) {
-      toast.error(err.response?.data?.error || 'Error al iniciar sesión');
+      console.error('LOGIN ERROR:', JSON.stringify(err.response?.data));
+      toast.error(err.response?.data?.error || 'Credenciales incorrectas');
     } finally {
       setCargando(false);
     }
@@ -75,7 +80,7 @@ export default function LoginGym() {
       if (usuarioTemp.rol === 'admin_gym' || usuarioTemp.rol === 'profesor') {
         navigate(`/gym/${gymSlug}/admin`);
       } else {
-        navigate(`/gym/${gymSlug}`);
+        navigate(`/gym/${gymSlug}/home`);
       }
     } catch (err) {
       toast.error(err.response?.data?.error || 'Error al cambiar contraseña');
@@ -86,7 +91,6 @@ export default function LoginGym() {
 
   const color = gym?.color_primario || '#f97316';
 
-  // PANTALLA: Cambio obligatorio de contraseña
   if (debeCambiar) {
     return (
       <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
@@ -101,39 +105,24 @@ export default function LoginGym() {
               Por seguridad, necesitás elegir una contraseña nueva antes de continuar.
             </p>
           </div>
-
           <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800">
             <form onSubmit={handleCambiarPassword} className="space-y-4">
               <div>
                 <label className="block text-sm text-gray-300 mb-1.5">Nueva contraseña</label>
-                <input
-                  type="password"
-                  value={nuevaPass}
-                  onChange={e => setNuevaPass(e.target.value)}
-                  className="input-field w-full"
-                  placeholder="Mínimo 6 caracteres"
-                  autoFocus
-                  required
-                />
+                <input type="password" value={nuevaPass} onChange={e => setNuevaPass(e.target.value)}
+                  className="input-field w-full" placeholder="Mínimo 6 caracteres" autoFocus required />
               </div>
               <div>
                 <label className="block text-sm text-gray-300 mb-1.5">Repetir contraseña</label>
-                <input
-                  type="password"
-                  value={confirmarPass}
-                  onChange={e => setConfirmarPass(e.target.value)}
-                  className="input-field w-full"
-                  placeholder="Repetí la contraseña"
-                  required
-                />
+                <input type="password" value={confirmarPass} onChange={e => setConfirmarPass(e.target.value)}
+                  className="input-field w-full" placeholder="Repetí la contraseña" required />
                 {confirmarPass.length > 0 && (
                   <p className={`text-xs mt-1 ${nuevaPass === confirmarPass ? 'text-green-400' : 'text-red-400'}`}>
                     {nuevaPass === confirmarPass ? '✓ Coinciden' : 'No coinciden'}
                   </p>
                 )}
               </div>
-              <button
-                type="submit"
+              <button type="submit"
                 disabled={guardandoPass || nuevaPass !== confirmarPass || nuevaPass.length < 6}
                 className="w-full py-3 rounded-xl font-bold text-white transition-all disabled:opacity-40"
                 style={{ backgroundColor: color }}>
@@ -147,7 +136,6 @@ export default function LoginGym() {
     );
   }
 
-  // PANTALLA: Login normal
   return (
     <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
       <div className="w-full max-w-md">

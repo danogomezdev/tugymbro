@@ -409,10 +409,10 @@ const iniciarSesion = async (req, res) => {
       ? ejercicios.rows
       : (await pool.query(`SELECT re.* FROM rutina_ejercicios re WHERE re.rutina_id = $1 AND re.dia_numero = 1 ORDER BY re.orden`, [rutina.rows[0].id])).rows;
 
-    const sesion = await pool.query(
-      `INSERT INTO sesiones_entrenamiento (usuario_id, fecha, dia_rutina) VALUES ($1, $2, $3) RETURNING *`,
-      [usuarioId, hoy, diaRutina]
-    );
+   const sesion = await pool.query(
+  `INSERT INTO sesiones_entrenamiento (usuario_id, gimnasio_id, fecha, dia_rutina) VALUES ($1, $2, $3, $4) RETURNING *`,
+  [usuarioId, gId(req), hoy, diaRutina]
+  );
 
     for (const ej of ejerciciosFinales) {
       await pool.query(

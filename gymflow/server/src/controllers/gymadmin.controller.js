@@ -14,12 +14,11 @@ const getClientes = async (req, res) => {
     if (estado === 'bloqueado') { whereExtra += ' AND u.bloqueado = true'; }
     else if (estado === 'inactivo') { whereExtra += ' AND u.activo = false'; }
     else if (estado === 'activo') { whereExtra += ' AND u.activo = true AND u.bloqueado = false'; }
-    else { whereExtra += ' AND u.activo = true'; } // por defecto mostrar activos
+    else { whereExtra += ' AND u.activo = true'; }
     if (buscar) {
       params.push(`%${buscar}%`);
       whereExtra += ` AND (u.nombre ILIKE $${params.length} OR u.apellido ILIKE $${params.length} OR u.email ILIKE $${params.length})`;
     }
-
     const result = await pool.query(
       `SELECT u.id, u.nombre, u.apellido, u.email, u.plan, u.telefono,
               u.bloqueado, u.activo, u.creado_en, u.fecha_vencimiento_pago,
@@ -55,14 +54,14 @@ const getClientes = async (req, res) => {
 };
 
 const crearCliente = async (req, res) => {
-  const { nombre, apellido, email, password, plan, telefono, profesor_id } = req.body;
+  const { nombre, apellido, email, password, plan, telefono, profesor_id, fecha_vencimiento_pago, debe_cambiar_password } = req.body;
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
     const result = await client.query(
-      `INSERT INTO usuarios (gimnasio_id, nombre, apellido, email, password_hash, rol, plan, telefono)
-       VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf', 10)), 'cliente', $6, $7) RETURNING *`,
-      [gymId(req), nombre, apellido, email, password || 'Cambiar123!', plan || '3_dias', telefono]
+      `INSERT INTO usuarios (gimnasio_id, nombre, apellido, email, password_hash, rol, plan, telefono, fecha_vencimiento_pago)
+       VALUES ($1, $2, $3, $4, crypt($5, gen_salt('bf', 10)), 'cliente', $6, $7, $8) RETURNING *`,
+      [gymId(req), nombre, apellido, email, password || 'Cambiar123!', plan || null, telefono, fecha_vencimiento_pago || null]
     );
     const nuevoCliente = result.rows[0];
     if (profesor_id) {
@@ -142,7 +141,6 @@ const actualizarPlan = async (req, res) => {
       'UPDATE usuarios SET plan=$1, fecha_vencimiento_pago=$2 WHERE id=$3 AND gimnasio_id=$4',
       [plan, fecha_vencimiento_pago || null, id, gId]
     );
-    // Notificar al cliente del cambio de plan
     await pool.query(
       `INSERT INTO notificaciones (gimnasio_id, usuario_id, titulo, mensaje, tipo) VALUES ($1, $2, $3, $4, $5)`,
       [gId, id, '📋 Plan actualizado', `Tu plan fue actualizado a ${plan.replace('_',' ')}.`, 'info']
@@ -220,7 +218,7 @@ const getAlumnosDeProfesor = async (req, res) => {
 };
 
 // =============================================
-// CONFIGURACIÓN AMPLIADA DEL GYM
+// CONFIGURACIÓN
 // =============================================
 
 const getConfiguracion = async (req, res) => {
@@ -259,16 +257,11 @@ const actualizarConfiguracion = async (req, res) => {
     nombre_titular, banco, abierto_24h, dias_abierto
   } = req.body;
   const gId = gymId(req);
-
-  // Convertir strings vacíos a null para columnas numéricas
   const toNum = (v) => (v === '' || v === null || v === undefined) ? null : parseFloat(v);
   const toInt = (v) => (v === '' || v === null || v === undefined) ? null : parseInt(v);
-
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-
-    // Guardar configuración del gym
     await client.query(
       `INSERT INTO configuracion_gym (
         gimnasio_id, precio_1dia, precio_2dias, precio_3dias, precio_libre, texto_bienvenida,
@@ -293,19 +286,13 @@ const actualizarConfiguracion = async (req, res) => {
         plan_libre || false,
         alias_transferencia || null, nombre_titular || null, banco || null,
         abierto_24h || false,
-        dias_abierto || ['lunes','martes','miercoles','jueves','viernes'],
+        dias_abierto || ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'],
         descripcion || null, instagram || null, whatsapp || null
       ]
     );
-
-    // Solo actualizar color_primario en gimnasios (columna que sí existe)
     if (color_primario) {
-      await client.query(
-        `UPDATE gimnasios SET color_primario = $1 WHERE id = $2`,
-        [color_primario, gId]
-      );
+      await client.query(`UPDATE gimnasios SET color_primario = $1 WHERE id = $2`, [color_primario, gId]);
     }
-
     await client.query('COMMIT');
     res.json({ mensaje: 'Configuración actualizada correctamente' });
   } catch (error) {
@@ -369,33 +356,54 @@ const eliminarHorario = async (req, res) => {
   const { id } = req.params;
   const gId = gymId(req);
   try {
+    const reservas = await pool.query('SELECT COUNT(*) FROM reservas WHERE horario_id=$1', [id]);
+    if (parseInt(reservas.rows[0].count) > 0) {
+      await pool.query(`UPDATE horarios SET activo=false WHERE id=$1 AND gimnasio_id=$2`, [id, gId]);
+      return res.json({ mensaje: 'Horario desactivado (tenía reservas asociadas)' });
+    }
     await pool.query(`DELETE FROM horarios WHERE id=$1 AND gimnasio_id=$2`, [id, gId]);
     res.json({ mensaje: 'Horario eliminado' });
   } catch { res.status(500).json({ error: 'Error al eliminar horario' }); }
 };
 
 const bulkHorarios = async (req, res) => {
-  const { slots } = req.body; // [{ dia_semana, hora_inicio, hora_fin, capacidad_maxima }]
+  const { slots } = req.body;
   const gId = gymId(req);
   const client = await pool.connect();
   try {
     await client.query('BEGIN');
-    // Borrar todos los horarios actuales del gym
-    await client.query('DELETE FROM horarios WHERE gimnasio_id=$1', [gId]);
-    // Insertar los nuevos
-    if (slots && slots.length > 0) {
-      const values = slots.map((s, i) => {
-        const base = i * 4;
-        return `($${base+1},$${base+2},$${base+3},$${base+4},$${base+5})`;
-      }).join(',');
-      const params = slots.flatMap(s => [gId, s.dia_semana, s.hora_inicio, s.hora_fin, s.capacidad_maxima || 20]);
-      await client.query(
-        `INSERT INTO horarios (gimnasio_id, dia_semana, hora_inicio, hora_fin, capacidad_maxima) VALUES ${values}`,
-        params
-      );
+    if (!slots || slots.length === 0) {
+      await client.query('UPDATE horarios SET activo=false WHERE gimnasio_id=$1', [gId]);
+      await client.query('COMMIT');
+      return res.json({ mensaje: '0 horarios guardados', total: 0 });
     }
+    const existentes = await client.query('SELECT id, dia_semana, hora_inicio FROM horarios WHERE gimnasio_id=$1', [gId]);
+    const idsActivos = [];
+    for (const s of slots) {
+      const horaInicio = s.hora_inicio.slice(0, 5);
+      const existente = existentes.rows.find(e => e.dia_semana === s.dia_semana && e.hora_inicio.slice(0, 5) === horaInicio);
+      if (existente) {
+        await client.query(
+          `UPDATE horarios SET hora_fin=$1, capacidad_maxima=$2, activo=true WHERE id=$3 AND gimnasio_id=$4`,
+          [s.hora_fin, s.capacidad_maxima || 20, existente.id, gId]
+        );
+        idsActivos.push(existente.id);
+      } else {
+        const nuevo = await client.query(
+          `INSERT INTO horarios (gimnasio_id, dia_semana, hora_inicio, hora_fin, capacidad_maxima, activo) VALUES ($1,$2,$3,$4,$5,true) RETURNING id`,
+          [gId, s.dia_semana, s.hora_inicio, s.hora_fin, s.capacidad_maxima || 20]
+        );
+        idsActivos.push(nuevo.rows[0].id);
+      }
+    }
+    await client.query(`UPDATE horarios SET activo=false WHERE gimnasio_id=$1 AND id != ALL($2::int[])`, [gId, idsActivos]);
+    const diasConHorarios = [...new Set(slots.map(s => s.dia_semana))];
+    await client.query(
+      `INSERT INTO configuracion_gym (gimnasio_id, dias_abierto) VALUES ($1, $2) ON CONFLICT (gimnasio_id) DO UPDATE SET dias_abierto = $2, actualizado_en = NOW()`,
+      [gId, diasConHorarios]
+    );
     await client.query('COMMIT');
-    res.json({ mensaje: `${slots?.length || 0} horarios guardados`, total: slots?.length || 0 });
+    res.json({ mensaje: `${slots.length} horarios guardados`, total: slots.length });
   } catch (error) {
     await client.query('ROLLBACK');
     console.error(error);
@@ -404,7 +412,7 @@ const bulkHorarios = async (req, res) => {
 };
 
 // =============================================
-// DASHBOARD STATS
+// DASHBOARD
 // =============================================
 
 const getDashboard = async (req, res) => {
@@ -456,14 +464,36 @@ const getDashboard = async (req, res) => {
   }
 };
 
+// ✅ FIX: ahora actualiza plan y fecha_vencimiento_pago al aprobar
 const gestionarPago = async (req, res) => {
   const { pagoId } = req.params;
   const { accion } = req.body;
   const gId = gymId(req);
   try {
     await pool.query(`UPDATE solicitudes_pago SET estado=$1 WHERE id=$2 AND gimnasio_id=$3`, [accion, pagoId, gId]);
+
+    if (accion === 'aprobado') {
+      const solicitud = await pool.query('SELECT * FROM solicitudes_pago WHERE id=$1', [pagoId]);
+      if (solicitud.rows[0]) {
+        const { usuario_id, plan } = solicitud.rows[0];
+        const venc = new Date();
+        venc.setMonth(venc.getMonth() + 1);
+        await pool.query(
+          `UPDATE usuarios SET plan=$1, bloqueado=false, fecha_vencimiento_pago=$2 WHERE id=$3 AND gimnasio_id=$4`,
+          [plan, venc.toISOString().split('T')[0], usuario_id, gId]
+        );
+        await pool.query(
+          `INSERT INTO notificaciones (gimnasio_id, usuario_id, titulo, mensaje, tipo) VALUES ($1,$2,$3,$4,$5)`,
+          [gId, usuario_id, '✅ Plan aprobado!', 'Tu plan fue aprobado. Ya podés reservar tus turnos.', 'info']
+        ).catch(() => {});
+      }
+    }
+
     res.json({ mensaje: `Pago ${accion}` });
-  } catch { res.status(500).json({ error: 'Error' }); }
+  } catch (err) {
+    console.error('gestionarPago error:', err);
+    res.status(500).json({ error: 'Error' });
+  }
 };
 
 // =============================================
@@ -523,7 +553,6 @@ const gestionarSolicitudPago = async (req, res) => {
   const { estado, notas } = req.body;
   const gId = gymId(req);
   try {
-    // Si aprobado, activar el plan del usuario
     if (estado === 'aprobado') {
       const solicitud = await pool.query('SELECT * FROM solicitudes_pago WHERE id=$1', [solicitudId]);
       if (solicitud.rows[0]) {
@@ -535,7 +564,7 @@ const gestionarSolicitudPago = async (req, res) => {
         );
         await pool.query(
           `INSERT INTO notificaciones (gimnasio_id, usuario_id, titulo, mensaje, tipo) VALUES ($1,$2,$3,$4,$5)`,
-          [gId, usuario_id, '✅ Plan aprobado!', `Tu plan fue aprobado. Ya podés reservar tus turnos.`, 'info']
+          [gId, usuario_id, '✅ Plan aprobado!', 'Tu plan fue aprobado. Ya podés reservar tus turnos.', 'info']
         ).catch(() => {});
       }
     }
@@ -580,8 +609,7 @@ const gestionarRecupero = async (req, res) => {
       if (sol.rows[0]) {
         const { usuario_id, horario_id, fecha_recupero } = sol.rows[0];
         await pool.query(
-          `INSERT INTO reservas (gimnasio_id, usuario_id, horario_id, fecha, estado)
-           VALUES ($1,$2,$3,$4,'confirmada') ON CONFLICT DO NOTHING`,
+          `INSERT INTO reservas (gimnasio_id, usuario_id, horario_id, fecha, estado) VALUES ($1,$2,$3,$4,'confirmada') ON CONFLICT DO NOTHING`,
           [gId, usuario_id, horario_id, fecha_recupero]
         );
         await pool.query(
@@ -598,6 +626,22 @@ const gestionarRecupero = async (req, res) => {
   } catch { res.status(500).json({ error: 'Error' }); }
 };
 
+// =============================================
+// CUENTA DEL ADMIN
+// =============================================
+
+const actualizarCuenta = async (req, res) => {
+  const { nombre, apellido } = req.body;
+  const usuarioId = req.usuario.id;
+  try {
+    await pool.query('UPDATE usuarios SET nombre=$1, apellido=$2 WHERE id=$3', [nombre, apellido, usuarioId]);
+    res.json({ mensaje: 'Datos actualizados correctamente' });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: 'Error al actualizar datos' });
+  }
+};
+
 module.exports = {
   getClientes, crearCliente, actualizarCliente, eliminarCliente,
   toggleBloqueo, actualizarPlan, toggleActivo,
@@ -607,5 +651,6 @@ module.exports = {
   getDashboard, gestionarPago,
   getTurnos, marcarAsistencia,
   getSolicitudesPago, gestionarSolicitudPago,
-  getSolicitudesRecupero, gestionarRecupero
+  getSolicitudesRecupero, gestionarRecupero,
+  actualizarCuenta
 };

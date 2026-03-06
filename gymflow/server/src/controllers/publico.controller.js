@@ -1,16 +1,12 @@
 const pool = require('../config/db');
 
-// Info pública completa de un gimnasio (para su landing page)
+// Info pública de un gimnasio (para la landing page del gym)
 const getInfoGym = async (req, res) => {
   const { gymSlug } = req.params;
   try {
     const result = await pool.query(
-      `SELECT g.id, g.slug, g.nombre, g.logo_url, g.color_primario, g.estado,
-              c.descripcion, c.instagram, c.whatsapp,
-              c.precio_1dia, c.precio_2dias, c.precio_3dias,
-              c.texto_bienvenida, c.alias_transferencia, c.nombre_titular, c.banco,
-              c.modo_acceso, c.planes_activos, c.plan_libre,
-              c.sin_limite_personas, c.capacidad_default, c.abierto_24h,
+      `SELECT g.slug, g.nombre, g.logo_url, g.color_primario, g.estado,
+              c.precio_1dia, c.precio_2dias, c.precio_3dias, c.texto_bienvenida,
               pp.feature_reservas, pp.feature_rutinas, pp.nombre as plan_nombre
        FROM gimnasios g
        LEFT JOIN configuracion_gym c ON c.gimnasio_id = g.id
@@ -19,10 +15,9 @@ const getInfoGym = async (req, res) => {
       [gymSlug]
     );
     if (result.rows.length === 0) return res.status(404).json({ error: 'Gimnasio no encontrado' });
-    if (result.rows[0].estado !== 'activo') return res.status(403).json({ error: 'Gimnasio no disponible', estado: result.rows[0].estado });
+    if (result.rows[0].estado !== 'activo') return res.status(403).json({ error: 'Gimnasio no disponible' });
     res.json({ gym: result.rows[0] });
   } catch (error) {
-    console.error(error);
     res.status(500).json({ error: 'Error' });
   }
 };
@@ -30,18 +25,22 @@ const getInfoGym = async (req, res) => {
 // Solicitud de registro de nuevo gimnasio
 const solicitarRegistroGym = async (req, res) => {
   const { nombre_gym, slug_deseado, nombre_contacto, email_contacto, telefono, plan_solicitado, mensaje } = req.body;
+
   try {
     const slugExiste = await pool.query(`SELECT id FROM gimnasios WHERE slug = $1`, [slug_deseado]);
     if (slugExiste.rows.length > 0) return res.status(400).json({ error: 'Ese nombre ya está en uso, elegí otro' });
+
     const solExiste = await pool.query(
       `SELECT id FROM solicitudes_gimnasio WHERE slug_deseado = $1 AND estado = 'pendiente'`, [slug_deseado]
     );
     if (solExiste.rows.length > 0) return res.status(400).json({ error: 'Ya hay una solicitud pendiente con ese nombre' });
+
     await pool.query(
       `INSERT INTO solicitudes_gimnasio (nombre_gym, slug_deseado, nombre_contacto, email_contacto, telefono, plan_solicitado, mensaje)
        VALUES ($1, $2, $3, $4, $5, $6, $7)`,
       [nombre_gym, slug_deseado, nombre_contacto, email_contacto, telefono, plan_solicitado, mensaje]
     );
+
     res.status(201).json({ mensaje: 'Solicitud enviada correctamente. Te contactaremos pronto.' });
   } catch (error) {
     console.error(error);
@@ -49,4 +48,31 @@ const solicitarRegistroGym = async (req, res) => {
   }
 };
 
-module.exports = { getInfoGym, solicitarRegistroGym };
+// Buscador de gimnasios activos (para la pantalla Welcome de la app mobile)
+// GET /public/gyms/buscar?q=nombre
+const buscarGyms = async (req, res) => {
+  try {
+    const { q } = req.query;
+
+    if (!q || q.trim().length < 2) {
+      return res.status(400).json({ error: 'Ingresá al menos 2 caracteres' });
+    }
+
+    const { rows } = await pool.query(
+      `SELECT slug, nombre, logo_url, color_primario, direccion
+       FROM gimnasios
+       WHERE estado = 'activo'
+         AND (nombre ILIKE $1 OR slug ILIKE $1)
+       ORDER BY nombre ASC
+       LIMIT 10`,
+      [`%${q.trim()}%`]
+    );
+
+    res.json({ gyms: rows });
+  } catch (err) {
+    console.error('buscarGyms error:', err);
+    res.status(500).json({ error: 'Error al buscar gimnasios' });
+  }
+};
+
+module.exports = { getInfoGym, solicitarRegistroGym, buscarGyms };

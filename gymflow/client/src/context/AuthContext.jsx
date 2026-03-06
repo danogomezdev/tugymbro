@@ -50,11 +50,14 @@ export const AuthProvider = ({ children }) => {
   };
 
   const logout = () => {
+    const gymActual = gimnasio?.slug || localStorage.getItem('tgb_ultimo_gym');
     localStorage.removeItem('tgb_token');
     localStorage.removeItem('tgb_usuario');
     localStorage.removeItem('tgb_gimnasio');
+    if (gymActual) localStorage.setItem('tgb_ultimo_gym', gymActual);
     setUsuario(null);
     setGimnasio(null);
+    window.location.href = gymActual ? `/gym/${gymActual}` : '/';
   };
 
   const refreshGimnasio = async (gymSlug) => {
@@ -67,16 +70,28 @@ export const AuthProvider = ({ children }) => {
     } catch {}
   };
 
+  const refreshUsuario = async (gymSlug) => {
+    try {
+      const { data } = await api.get(`/gym/${gymSlug}/cliente/me`);
+      if (data.usuario) {
+        const usuarioActual = JSON.parse(localStorage.getItem('tgb_usuario') || '{}');
+        const usuarioActualizado = { ...usuarioActual, ...data.usuario };
+        setUsuario(usuarioActualizado);
+        localStorage.setItem('tgb_usuario', JSON.stringify(usuarioActualizado));
+      }
+    } catch {}
+  };
+
   const esSuperAdmin = () => usuario?.rol === 'superadmin';
   const esAdminGym = () => usuario?.rol === 'admin_gym';
   const esProfesor = () => usuario?.rol === 'profesor';
   const esCliente = () => usuario?.rol === 'cliente';
-  const tieneFeature = (f) => gimnasio?.[`feature_${f}`] === true;
+  const tieneFeature = (f) => gimnasio?.features?.[f] === true;
 
   return (
     <AuthContext.Provider value={{
       usuario, gimnasio, cargando,
-      loginGym, loginSuperAdmin, logout, refreshGimnasio,
+      loginGym, loginSuperAdmin, logout, refreshGimnasio, refreshUsuario,
       esSuperAdmin, esAdminGym, esProfesor, esCliente, tieneFeature
     }}>
       {children}

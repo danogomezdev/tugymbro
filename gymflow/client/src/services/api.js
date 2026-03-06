@@ -14,10 +14,14 @@ api.interceptors.response.use(
   (res) => res,
   (err) => {
     if (err.response?.status === 401) {
-      localStorage.removeItem('tgb_token');
-      localStorage.removeItem('tgb_usuario');
-      localStorage.removeItem('tgb_gimnasio');
-      window.location.href = '/';
+      const token = localStorage.getItem('tgb_token');
+      // Solo redirigir si había un token (sesión expirada), no si está intentando loguear
+      if (token) {
+        localStorage.removeItem('tgb_token');
+        localStorage.removeItem('tgb_usuario');
+        localStorage.removeItem('tgb_gimnasio');
+        window.location.href = '/';
+      }
     }
     return Promise.reject(err);
   }

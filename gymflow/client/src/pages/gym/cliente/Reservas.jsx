@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { format, addDays, startOfWeek, isSameDay, isToday, isPast } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Clock, Users, Check, AlertTriangle, Lock } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, Users, Check, AlertTriangle, Lock, CreditCard } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import NavbarCliente from './NavbarCliente';
 import api from '../../../services/api';
@@ -11,6 +11,7 @@ import toast from 'react-hot-toast';
 export default function Reservas() {
   const { gymSlug } = useParams();
   const { usuario, gimnasio } = useAuth();
+  const navigate = useNavigate();
   const [semanaOffset, setSemanaOffset] = useState(0);
   const [diaSeleccionado, setDiaSeleccionado] = useState(new Date());
   const [horarios, setHorarios] = useState([]);
@@ -22,13 +23,18 @@ export default function Reservas() {
   const [gymConfig, setGymConfig] = useState(null);
 
   const planLimites = { '1_dia':1, '2_dias':2, '3_dias':3, '4_dias':4, '5_dias':5, 'libre':999 };
+
+  // Plan activo = tiene plan Y fecha de vencimiento futura
+  const planActivo = usuario?.plan &&
+  usuario?.fecha_vencimiento_pago &&
+  new Date(usuario.fecha_vencimiento_pago) > new Date();
+
   const limite = gymConfig?.plan_libre ? 999 : (planLimites[usuario?.plan] || 3);
 
   const inicioSemana = startOfWeek(addDays(new Date(), semanaOffset * 7), { weekStartsOn: 1 });
   const diasSemana = Array.from({ length: 7 }, (_, i) => addDays(inicioSemana, i));
 
   useEffect(() => {
-    // Cargar config del gym para saber días abiertos
     api.get(`/gym/${gymSlug}/cliente/pagos/configuracion`)
       .then(({ data }) => setGymConfig(data.config))
       .catch(() => {});
@@ -67,11 +73,13 @@ export default function Reservas() {
     if (gymConfig.abierto_24h) return true;
     const dias = ['domingo','lunes','martes','miercoles','jueves','viernes','sabado'];
     const diaSemana = dias[fecha.getDay()];
-    const diasAbierto = Array.isArray(gymConfig.dias_abierto) ? gymConfig.dias_abierto : ['lunes','martes','miercoles','jueves','viernes'];
+    const diasAbierto = Array.isArray(gymConfig.dias_abierto) && gymConfig.dias_abierto.length > 0 ? gymConfig.dias_abierto : null;
+    if (!diasAbierto) return true;
     return diasAbierto.includes(diaSemana);
   };
 
   const reservar = async (horarioId = null) => {
+    if (!planActivo) { toast.error('Necesitás un plan activo para reservar.'); return; }
     if (usuario?.bloqueado) { toast.error('Tu cuenta está bloqueada.'); return; }
     if (limite < 999 && reservasEstaSemana.length >= limite) { toast.error(`Ya alcanzaste el límite de ${limite} clases para esta semana.`); return; }
     if (tengoReservaEseDia(diaSeleccionado)) { toast.error('Ya tenés una reserva para ese día.'); return; }
@@ -97,13 +105,31 @@ export default function Reservas() {
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-white">Reservar turno</h1>
-          {limite < 999 && (
+          {planActivo && limite < 999 && (
             <p className="text-gray-500 text-sm mt-0.5">
               Esta semana: <span className={reservasEstaSemana.length >= limite ? 'text-red-400' : 'text-orange-500'}>{reservasEstaSemana.length}/{limite}</span>
             </p>
           )}
         </div>
 
+        {/* Sin plan activo — bloqueo total */}
+        {!planActivo && (
+          <div className="bg-gray-900 border border-yellow-500/30 rounded-2xl p-6 mb-4 text-center">
+            <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-3"
+              style={{ backgroundColor: '#eab30820' }}>
+              <CreditCard className="text-yellow-500" size={22} />
+            </div>
+            <p className="font-bold text-white mb-1">Necesitás un plan activo</p>
+            <p className="text-gray-400 text-sm mb-4">Para reservar turnos primero tenés que contratar un plan y que el gimnasio lo apruebe.</p>
+            <button onClick={() => navigate(`/gym/${gymSlug}/pagar`)}
+              className="px-6 py-2.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-all"
+              style={{ backgroundColor: color }}>
+              Ver planes
+            </button>
+          </div>
+        )}
+
+        {/* Alerta cuenta bloqueada */}
         {usuario?.bloqueado && (
           <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-4 mb-4 flex items-start gap-3">
             <AlertTriangle className="text-red-500 flex-shrink-0" size={18} />
@@ -111,7 +137,7 @@ export default function Reservas() {
           </div>
         )}
 
-        {/* Navegación semana */}
+        {/* Calendario — siempre visible pero botones deshabilitados sin plan */}
         <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
             <button onClick={() => setSemanaOffset(o => o - 1)} className="text-gray-400 hover:text-white p-1"><ChevronLeft size={18} /></button>
@@ -145,7 +171,6 @@ export default function Reservas() {
           </div>
         </div>
 
-        {/* Horarios del día seleccionado */}
         <h2 className="font-bold text-white mb-3 text-sm capitalize">
           {format(diaSeleccionado, "EEEE d 'de' MMMM", { locale: es })}
         </h2>
@@ -158,7 +183,6 @@ export default function Reservas() {
             <p className="text-gray-500 text-sm font-medium">El gimnasio está cerrado este día</p>
           </div>
         ) : modoLibre ? (
-          /* GYM CON MODO LIBRE - sin horarios fijos */
           <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
             <div className="text-center mb-5">
               <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-3" style={{ backgroundColor: color + '20' }}>
@@ -172,7 +196,8 @@ export default function Reservas() {
                 <Check size={18} /> <span className="font-semibold text-sm">Ya reservaste este día</span>
               </div>
             ) : (
-              <button onClick={() => reservar(null)} disabled={usuario?.bloqueado || reservando !== null}
+              <button onClick={() => reservar(null)}
+                disabled={!planActivo || usuario?.bloqueado || reservando !== null}
                 className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 transition-all hover:opacity-90"
                 style={{ backgroundColor: color }}>
                 {reservando ? 'Reservando...' : 'Reservar este día'}
@@ -209,7 +234,8 @@ export default function Reservas() {
                   ) : h.lleno ? (
                     <span className="text-red-400 text-sm font-medium">Sin lugar</span>
                   ) : (
-                    <button onClick={() => reservar(h.id)} disabled={usuario?.bloqueado || reservando === h.id}
+                    <button onClick={() => reservar(h.id)}
+                      disabled={!planActivo || usuario?.bloqueado || reservando === h.id}
                       className="py-2 px-4 rounded-xl text-sm font-bold text-white disabled:opacity-40 transition-all hover:opacity-90"
                       style={{ backgroundColor: color }}>
                       {reservando === h.id ? '...' : 'Reservar'}

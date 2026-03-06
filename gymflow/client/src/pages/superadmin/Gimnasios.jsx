@@ -129,7 +129,7 @@ export default function SuperAdminGimnasios() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <a href={`/gym/${g.slug}/login`} target="_blank" rel="noreferrer"
+                  <a href={`/gym/${g.slug}`} target="_blank" rel="noreferrer"
                     className="text-gray-500 hover:text-white p-2 transition-colors" title="Ver app">
                     <ExternalLink size={16}/>
                   </a>

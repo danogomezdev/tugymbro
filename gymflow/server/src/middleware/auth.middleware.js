@@ -1,7 +1,6 @@
 const jwt = require('jsonwebtoken');
 const pool = require('../config/db');
 
-// Verifica token JWT y adjunta usuario + gimnasio al request
 const verificarToken = async (req, res, next) => {
   const auth = req.headers.authorization;
   if (!auth || !auth.startsWith('Bearer ')) {
@@ -11,14 +10,49 @@ const verificarToken = async (req, res, next) => {
   try {
     const token = auth.split(' ')[1];
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    req.usuario = decoded;
+
+    // Si es superadmin, buscar en tabla superadmins
+    if (decoded.rol === 'superadmin') {
+      const result = await pool.query(
+        'SELECT id, nombre, email FROM superadmins WHERE id = $1',
+        [decoded.id]
+      );
+      if (result.rows.length === 0) {
+        return res.status(401).json({ error: 'Usuario no encontrado' });
+      }
+      req.usuario = { ...result.rows[0], rol: 'superadmin', apellido: '' };
+      return next();
+    }
+
+    // Para el resto, buscar en usuarios con datos frescos
+    const result = await pool.query(
+      `SELECT id, nombre, apellido, email, rol, gimnasio_id,
+              plan, fecha_vencimiento_pago, bloqueado, activo,
+              debe_cambiar_password
+       FROM usuarios WHERE id = $1`,
+      [decoded.id]
+    );
+
+    if (result.rows.length === 0) {
+      return res.status(401).json({ error: 'Usuario no encontrado' });
+    }
+
+    const usuario = result.rows[0];
+    if (!usuario.activo) {
+      return res.status(403).json({ error: 'Cuenta desactivada' });
+    }
+
+    req.usuario = usuario;
     next();
-  } catch {
-    return res.status(401).json({ error: 'Token inválido o expirado' });
+  } catch (err) {
+    if (err.name === 'JsonWebTokenError' || err.name === 'TokenExpiredError') {
+      return res.status(401).json({ error: 'Token inválido o expirado' });
+    }
+    console.error('verificarToken error:', err);
+    return res.status(500).json({ error: 'Error del servidor' });
   }
 };
 
-// Solo super admin (dueño de la plataforma)
 const soloSuperAdmin = (req, res, next) => {
   if (req.usuario?.rol !== 'superadmin') {
     return res.status(403).json({ error: 'Acceso denegado' });
@@ -26,7 +60,6 @@ const soloSuperAdmin = (req, res, next) => {
   next();
 };
 
-// Solo admin del gym
 const soloAdminGym = (req, res, next) => {
   if (req.usuario?.rol !== 'admin_gym') {
     return res.status(403).json({ error: 'Acceso denegado' });
@@ -34,7 +67,6 @@ const soloAdminGym = (req, res, next) => {
   next();
 };
 
-// Admin gym o profesor
 const adminOProfesor = (req, res, next) => {
   if (!['admin_gym', 'profesor'].includes(req.usuario?.rol)) {
     return res.status(403).json({ error: 'Acceso denegado' });
@@ -42,7 +74,6 @@ const adminOProfesor = (req, res, next) => {
   next();
 };
 
-// Verifica que el gimnasio exista y esté activo, lo adjunta al request
 const verificarGimnasio = async (req, res, next) => {
   const slug = req.params.gymSlug || req.body.gymSlug || req.query.gymSlug;
   if (!slug) return res.status(400).json({ error: 'Gimnasio no especificado' });
@@ -75,16 +106,14 @@ const verificarGimnasio = async (req, res, next) => {
   }
 };
 
-// Verifica que el usuario pertenezca al gimnasio del request
 const verificarPertenencia = (req, res, next) => {
-  if (req.usuario?.rol === 'superadmin') return next(); // superadmin pasa siempre
+  if (req.usuario?.rol === 'superadmin') return next();
   if (req.usuario?.gimnasio_id !== req.gimnasio?.id) {
     return res.status(403).json({ error: 'No pertenecés a este gimnasio' });
   }
   next();
 };
 
-// Verifica feature habilitada según plan del gym
 const requiereFeature = (feature) => (req, res, next) => {
   if (!req.gimnasio?.[`feature_${feature}`]) {
     return res.status(403).json({

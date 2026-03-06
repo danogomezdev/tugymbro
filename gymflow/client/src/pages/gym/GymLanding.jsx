@@ -148,7 +148,7 @@ function AuthForm({ modo, setModo, formLogin, setFormLogin, formReg, setFormReg,
 
 export default function GymLanding() {
   const { gymSlug } = useParams();
-  const { loginGym, usuario, gimnasio: gymCtx } = useAuth();
+  const { loginGym, usuario, gimnasio: gymCtx, cargando: authCargando } = useAuth();
   const navigate = useNavigate();
   const [gym, setGym] = useState(null);
   const [cargando, setCargando] = useState(true);
@@ -170,11 +170,11 @@ export default function GymLanding() {
   }, [gymSlug]);
 
   useEffect(() => {
-    if (!cargando && usuario && gymCtx && gymCtx.slug === gymSlug) {
-      if (usuario.rol === 'admin_gym' || usuario.rol === 'profesor') navigate(`/gym/${gymSlug}/admin`);
-      else navigate(`/gym/${gymSlug}/home`);
+    if (!authCargando && usuario && gymCtx && gymCtx.slug === gymSlug) {
+      if (usuario.rol === 'admin_gym' || usuario.rol === 'profesor') navigate(`/gym/${gymSlug}/admin`, { replace: true });
+      else navigate(`/gym/${gymSlug}/home`, { replace: true });
     }
-  }, [usuario, gymCtx, cargando]);
+  }, [usuario, gymCtx, authCargando, gymSlug]);
 
   const handleLogin = useCallback(async (e) => {
     e.preventDefault();

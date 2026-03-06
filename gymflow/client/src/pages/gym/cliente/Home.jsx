@@ -11,7 +11,7 @@ const planLabels = { '1_dia':'1 día/semana', '2_dias':'2 días/semana', '3_dias
 
 export default function ClienteHome() {
   const { gymSlug } = useParams();
-  const { usuario, gimnasio } = useAuth();
+  const { usuario, gimnasio, refreshUsuario } = useAuth();
   const navigate = useNavigate();
   const [reservas, setReservas] = useState([]);
   const [notificaciones, setNotificaciones] = useState([]);
@@ -19,6 +19,7 @@ export default function ClienteHome() {
   const [cargando, setCargando] = useState(true);
 
   useEffect(() => {
+    refreshUsuario(gymSlug);
     const cargar = async () => {
       try {
         const mes = new Date().getMonth() + 1;
@@ -37,16 +38,20 @@ export default function ClienteHome() {
   }, [gymSlug]);
 
   const reservasConfirmadas = reservas.filter(r => r.estado === 'confirmada');
-  const vencida = usuario?.fecha_vencimiento_pago && new Date(usuario.fecha_vencimiento_pago) < new Date();
   const color = gimnasio?.color_primario || '#f97316';
-  const sinPlan = !usuario?.plan || usuario.plan === '3_dias'; // Default - mostrar botón contratar
+
+  const planActivo = usuario?.plan &&
+  usuario?.fecha_vencimiento_pago &&
+  new Date(usuario.fecha_vencimiento_pago) > new Date();
+
+  const vencida = usuario?.fecha_vencimiento_pago &&
+    new Date(usuario.fecha_vencimiento_pago + 'T23:59:59') < new Date();
 
   return (
     <div className="min-h-screen bg-gray-950 pb-20">
       <NavbarCliente notifCount={notifNoLeidas} />
       <main className="max-w-2xl mx-auto px-4 py-6">
 
-        {/* Alertas */}
         {usuario?.bloqueado && (
           <div className="bg-red-900/30 border border-red-500/50 rounded-xl p-3 mb-4 flex items-start gap-3">
             <AlertTriangle className="text-red-500 mt-0.5 flex-shrink-0" size={16} />
@@ -56,6 +61,7 @@ export default function ClienteHome() {
             </div>
           </div>
         )}
+
         {!usuario?.bloqueado && vencida && (
           <div className="bg-yellow-900/30 border border-yellow-500/50 rounded-xl p-3 mb-4 flex items-start gap-3">
             <AlertTriangle className="text-yellow-500 mt-0.5 flex-shrink-0" size={16} />
@@ -68,7 +74,6 @@ export default function ClienteHome() {
           </div>
         )}
 
-        {/* Saludo */}
         <div className="mb-5">
           <h2 className="text-2xl font-bold text-white">
             Hola, <span style={{ color }}>{usuario?.nombre}</span> 👋
@@ -76,24 +81,20 @@ export default function ClienteHome() {
           <p className="text-gray-500 text-sm mt-0.5 capitalize">{format(new Date(), "EEEE d 'de' MMMM", { locale: es })}</p>
         </div>
 
-        {/* Banner contratar plan — solo si NO tiene fecha de vencimiento futura */}
-        {(() => {
-          const tieneVencimientoActivo = usuario?.fecha_vencimiento_pago && new Date(usuario.fecha_vencimiento_pago) > new Date();
-          if (tieneVencimientoActivo) return null;
-          return (
-            <div onClick={() => navigate(`/gym/${gymSlug}/pagar`)}
-              className="rounded-2xl p-4 mb-5 cursor-pointer flex items-center justify-between hover:opacity-95 transition-opacity"
-              style={{ background: `linear-gradient(135deg, ${color}30 0%, ${color}10 100%)`, border: `1px solid ${color}40` }}>
-              <div>
-                <p className="font-bold text-white text-sm">Contratá tu plan</p>
-                <p className="text-gray-400 text-xs mt-0.5">Enviá el comprobante y activá tu membresía</p>
-              </div>
-              <span className="text-xs font-bold px-3 py-1.5 rounded-xl text-white" style={{ backgroundColor: color }}>
-                Ver planes
-              </span>
+        {/* Banner — solo si no tiene plan activo */}
+        {!planActivo && (
+          <div onClick={() => navigate(`/gym/${gymSlug}/pagar`)}
+            className="rounded-2xl p-4 mb-5 cursor-pointer flex items-center justify-between hover:opacity-95 transition-opacity"
+            style={{ background: `linear-gradient(135deg, ${color}30 0%, ${color}10 100%)`, border: `1px solid ${color}40` }}>
+            <div>
+              <p className="font-bold text-white text-sm">{vencida ? 'Renovar tu plan' : 'Contratá tu plan'}</p>
+              <p className="text-gray-400 text-xs mt-0.5">Enviá el comprobante y activá tu membresía</p>
             </div>
-          );
-        })()}
+            <span className="text-xs font-bold px-3 py-1.5 rounded-xl text-white" style={{ backgroundColor: color }}>
+              Ver planes
+            </span>
+          </div>
+        )}
 
         {/* Stats */}
         <div className="grid grid-cols-3 gap-3 mb-5">
@@ -106,8 +107,8 @@ export default function ClienteHome() {
             <p className="text-gray-500 text-xs mt-0.5">Plan actual</p>
           </div>
           <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center p-3">
-            <p className={`text-sm font-bold ${usuario?.bloqueado ? 'text-red-400' : 'text-green-400'}`}>
-              {usuario?.bloqueado ? 'Bloqueada' : 'Activa'}
+            <p className={`text-sm font-bold ${usuario?.bloqueado ? 'text-red-400' : planActivo ? 'text-green-400' : 'text-yellow-400'}`}>
+              {usuario?.bloqueado ? 'Bloqueada' : planActivo ? 'Activa' : 'Sin plan'}
             </p>
             <p className="text-gray-500 text-xs mt-0.5">Estado</p>
           </div>
@@ -118,7 +119,7 @@ export default function ClienteHome() {
           {[
             { icon: Calendar, label: 'Reservar turno', sub: 'Ver horarios disponibles', path: 'reservas', colorStyle: { backgroundColor: color + '20', color } },
             { icon: CreditCard, label: 'Pagar cuota', sub: 'Enviá tu comprobante', path: 'pagar', colorStyle: { backgroundColor: '#22c55e20', color: '#22c55e' } },
-            { icon: Dumbbell, label: 'Mi rutina', sub: 'Ver ejercicios', path: 'rutina', colorStyle: { backgroundColor: color + '20', color }, hide: !gimnasio?.feature_rutinas },
+            { icon: Dumbbell, label: 'Mi rutina', sub: 'Ver ejercicios', path: 'rutina', colorStyle: { backgroundColor: color + '20', color }, hide: !gimnasio?.features?.rutinas },
             { icon: RefreshCw, label: 'Recupero', sub: 'Recuperar clase', path: 'recupero', colorStyle: { backgroundColor: '#a855f720', color: '#a855f7' } },
           ].filter(i => !i.hide).map((item, i) => (
             <button key={i} onClick={() => navigate(`/gym/${gymSlug}/${item.path}`)}

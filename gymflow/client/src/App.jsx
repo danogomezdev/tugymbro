@@ -29,6 +29,7 @@ import ClientePagar from './pages/gym/cliente/Pagar';
 import ClienteRecupero from './pages/gym/cliente/Recupero';
 import ClienteNotificaciones from './pages/gym/cliente/Notificaciones';
 import ClienteMiRutina from './pages/gym/cliente/MiRutina';
+import ClientePerfil from './pages/gym/cliente/Perfil';
 
 const Spinner = () => (
   <div className="min-h-screen bg-gray-950 flex items-center justify-center">
@@ -36,7 +37,6 @@ const Spinner = () => (
   </div>
 );
 
-// Rutas superadmin
 const PrivateRoute = ({ children, roles }) => {
   const { usuario, cargando } = useAuth();
   if (cargando) return <Spinner />;
@@ -45,7 +45,6 @@ const PrivateRoute = ({ children, roles }) => {
   return children;
 };
 
-// Rutas de admin/profe del gym
 const GymRoute = ({ children, roles }) => {
   const { gymSlug } = useParams();
   const { usuario, gimnasio, cargando } = useAuth();
@@ -55,16 +54,14 @@ const GymRoute = ({ children, roles }) => {
   return children;
 };
 
-// Rutas de cliente — requiere login en este gym
 const ClienteRoute = ({ children }) => {
   const { gymSlug } = useParams();
   const { usuario, gimnasio, cargando } = useAuth();
   if (cargando) return <Spinner />;
-  if (!usuario || !gimnasio) return <Navigate to={`/gym/${gymSlug}`} />;
-  // Si el gym del token no coincide con el gym de la URL, redirigir a landing
-  if (gimnasio.slug !== gymSlug) return <Navigate to={`/gym/${gymSlug}`} />;
+  if (!usuario || !gimnasio) return <Navigate to={`/gym/${gymSlug}`} replace />;
+  if (gimnasio.slug !== gymSlug) return <Navigate to={`/gym/${gymSlug}`} replace />;
   if (usuario.rol === 'admin_gym' || usuario.rol === 'profesor') {
-    return <Navigate to={`/gym/${gymSlug}/admin`} />;
+    return <Navigate to={`/gym/${gymSlug}/admin`} replace />;
   }
   return children;
 };
@@ -82,10 +79,8 @@ function AppRoutes() {
       <Route path="/superadmin/planes" element={<PrivateRoute roles={['superadmin']}><SuperAdminPlanes /></PrivateRoute>} />
       <Route path="/superadmin/usuarios" element={<PrivateRoute roles={['superadmin']}><SuperAdminUsuarios /></PrivateRoute>} />
 
-      {/* Landing pública del gym — login + registro + info */}
       <Route path="/gym/:gymSlug" element={<GymLanding />} />
 
-      {/* Admin del gym */}
       <Route path="/gym/:gymSlug/admin" element={<GymRoute roles={['admin_gym']}><GymDashboard /></GymRoute>} />
       <Route path="/gym/:gymSlug/admin/clientes" element={<GymRoute roles={['admin_gym','profesor']}><GymClientes /></GymRoute>} />
       <Route path="/gym/:gymSlug/admin/profesores" element={<GymRoute roles={['admin_gym']}><GymProfesores /></GymRoute>} />
@@ -96,7 +91,6 @@ function AppRoutes() {
       <Route path="/gym/:gymSlug/admin/pagos" element={<GymRoute roles={['admin_gym']}><GymPagos /></GymRoute>} />
       <Route path="/gym/:gymSlug/admin/recuperos" element={<GymRoute roles={['admin_gym']}><GymRecuperos /></GymRoute>} />
 
-      {/* Área del cliente autenticado */}
       <Route path="/gym/:gymSlug/home" element={<ClienteRoute><ClienteHome /></ClienteRoute>} />
       <Route path="/gym/:gymSlug/reservas" element={<ClienteRoute><ClienteReservas /></ClienteRoute>} />
       <Route path="/gym/:gymSlug/mis-reservas" element={<ClienteRoute><ClienteMisReservas /></ClienteRoute>} />
@@ -104,6 +98,7 @@ function AppRoutes() {
       <Route path="/gym/:gymSlug/recupero" element={<ClienteRoute><ClienteRecupero /></ClienteRoute>} />
       <Route path="/gym/:gymSlug/notificaciones" element={<ClienteRoute><ClienteNotificaciones /></ClienteRoute>} />
       <Route path="/gym/:gymSlug/rutina" element={<ClienteRoute><ClienteMiRutina /></ClienteRoute>} />
+      <Route path="/gym/:gymSlug/perfil" element={<ClienteRoute><ClientePerfil /></ClienteRoute>} />
 
       <Route path="*" element={<Navigate to="/" />} />
     </Routes>

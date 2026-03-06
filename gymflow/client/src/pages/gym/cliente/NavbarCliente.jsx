@@ -1,10 +1,10 @@
 import { useNavigate, useParams, useLocation } from 'react-router-dom';
-import { Home, Calendar, Dumbbell, RefreshCw, Bell, LogOut } from 'lucide-react';
+import { Home, Calendar, Dumbbell, RefreshCw, Bell, User } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
 export default function NavbarCliente({ notifCount = 0 }) {
   const { gymSlug } = useParams();
-  const { gimnasio, logout } = useAuth();
+  const { gimnasio, usuario, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -14,12 +14,17 @@ export default function NavbarCliente({ notifCount = 0 }) {
   const items = [
     { path: `${base}/home`, icon: Home, label: 'Inicio' },
     { path: `${base}/reservas`, icon: Calendar, label: 'Reservas' },
-    gimnasio?.feature_rutinas && { path: `${base}/rutina`, icon: Dumbbell, label: 'Rutina' },
+    gimnasio?.features?.rutinas && { path: `${base}/rutina`, icon: Dumbbell, label: 'Rutina' },
     { path: `${base}/recupero`, icon: RefreshCw, label: 'Recupero' },
     { path: `${base}/notificaciones`, icon: Bell, label: 'Avisos', badge: notifCount },
+    { path: `${base}/perfil`, icon: User, label: 'Perfil' },
   ].filter(Boolean);
 
   const isActive = (path) => location.pathname === path || (path === `${base}/home` && location.pathname === base);
+
+  const irAPerfil = () => {
+    if (gymSlug) navigate(`/gym/${gymSlug}/perfil`);
+  };
 
   return (
     <>
@@ -35,8 +40,11 @@ export default function NavbarCliente({ notifCount = 0 }) {
             }
             <span className="font-bold text-white text-sm">{gimnasio?.nombre}</span>
           </div>
-          <button onClick={logout} className="text-gray-500 hover:text-red-400 p-1.5 transition-colors">
-            <LogOut size={16} />
+          {/* Avatar — abre perfil */}
+          <button onClick={irAPerfil}
+            className="w-8 h-8 rounded-xl flex items-center justify-center text-sm font-black text-white transition-opacity hover:opacity-80"
+            style={{ backgroundColor: color + '30', color }}>
+            {usuario?.nombre?.charAt(0)?.toUpperCase() || '?'}
           </button>
         </div>
       </header>

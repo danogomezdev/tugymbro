@@ -33,12 +33,11 @@ export default function Pagar() {
         const c = data.config;
         setConfig(c);
         // Construir lista de planes disponibles
-        let planes = [];
-        if (c.plan_libre) {
-          planes = ['libre'];
-        } else {
-          const activos = Array.isArray(c.planes_activos) ? c.planes_activos : ['2_dias','3_dias'];
-          planes = activos;
+        const activos = Array.isArray(c.planes_activos) ? c.planes_activos : ['2_dias','3_dias'];
+        let planes = [...activos];
+        // Si plan_libre está activo, agregar 'libre' al final si no está ya
+        if (c.plan_libre && !planes.includes('libre')) {
+          planes = [...planes, 'libre'];
         }
         setPlanesActivos(planes);
       })
@@ -56,7 +55,7 @@ export default function Pagar() {
       '3_dias': config.precio_3dias || config.precio_3_dias,
       '4_dias': config.precio_3dias || config.precio_3_dias,
       '5_dias': config.precio_3dias || config.precio_3_dias,
-      'libre': config.precio_3dias || config.precio_3_dias,
+      'libre': config.precio_libre || config.precio_3dias || config.precio_3_dias,
     };
     const p = precios[key];
     return p ? `$${parseInt(p).toLocaleString('es-AR')}` : 'Consultá';

@@ -8,7 +8,8 @@ const {
   getDashboard, gestionarPago,
   getTurnos, marcarAsistencia,
   getSolicitudesPago, gestionarSolicitudPago,
-  getSolicitudesRecupero, gestionarRecupero
+  getSolicitudesRecupero, gestionarRecupero,
+  actualizarCuenta
 } = require('../controllers/gymadmin.controller');
 const { verificarToken, soloAdminGym, adminOProfesor, verificarGimnasio, verificarPertenencia, requiereFeature } = require('../middleware/auth.middleware');
 
@@ -29,6 +30,7 @@ router.get('/profesores/:profesorId/alumnos', adminOProfesor, requiereFeature('p
 
 router.get('/configuracion', soloAdminGym, getConfiguracion);
 router.put('/configuracion', soloAdminGym, actualizarConfiguracion);
+router.put('/configuracion/cuenta', soloAdminGym, actualizarCuenta);
 
 // Horarios
 router.post('/horarios/bulk', soloAdminGym, bulkHorarios);

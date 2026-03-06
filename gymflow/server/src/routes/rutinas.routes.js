@@ -31,7 +31,7 @@ router.get('/cliente/:usuarioId/archivada/:rutinaId', adminOProfesor, getRutinaA
 router.get('/mi-rutina', getMiRutina);
 router.get('/mi-rutina/archivada/:rutinaId', getMiRutinaArchivada);
 router.post('/sesion/iniciar', iniciarSesion);
-router.post('/sesion/:sesionId/ejercicio', completarEjercicio);
+router.post('/sesion/:sesionEjercicioId/ejercicio', completarEjercicio);
 router.get('/mi-historial', getMiHistorial);
 router.get('/sesion/:sesionId', getDetalleSesion);
 router.get('/mi-progreso', getMiProgreso);
