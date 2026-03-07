@@ -7,10 +7,10 @@ import api from '../../../services/api';
 import toast from 'react-hot-toast';
 
 const estadoStyles = {
-  confirmada: 'bg-green-900/30 text-green-400 text-xs px-2 py-0.5 rounded-full border border-green-500/30',
-  cancelada:  'bg-gray-800 text-gray-500 text-xs px-2 py-0.5 rounded-full',
-  asistio:    'bg-blue-900/30 text-blue-400 text-xs px-2 py-0.5 rounded-full border border-blue-500/30',
-  ausente:    'bg-red-900/30 text-red-400 text-xs px-2 py-0.5 rounded-full border border-red-500/30',
+  confirmada: 'bg-green-950/50 text-green-400 text-xs px-2 py-0.5 rounded-full border border-green-900',
+  cancelada:  'bg-neutral-900 text-neutral-500 text-xs px-2 py-0.5 rounded-full',
+  asistio:    'bg-blue-950/50 text-blue-400 text-xs px-2 py-0.5 rounded-full border border-blue-900',
+  ausente:    'bg-red-950/50 text-red-400 text-xs px-2 py-0.5 rounded-full border border-red-900',
 };
 
 export default function GymTurnos() {
@@ -44,25 +44,24 @@ export default function GymTurnos() {
     } catch { toast.error('Error al registrar asistencia'); }
   };
 
-  const color = gimnasio?.color_primario || '#f97316';
+  const color = gimnasio?.color_primario || '#3b82f6';
 
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <div className="min-h-screen bg-black">
+      <header className="bg-neutral-950 border-b border-neutral-900 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(`/gym/${gymSlug}/admin`)} className="text-gray-400 hover:text-white"><ArrowLeft size={20}/></button>
-            <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{backgroundColor:`${color}20`}}>
-              <Dumbbell size={14} style={{color}}/>
+            <button onClick={() => navigate(`/gym/${gymSlug}/admin`)} className="text-neutral-600 hover:text-white transition-colors"><ArrowLeft size={20}/></button>
+            <div className="w-7 h-7 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+              <Dumbbell size={14} className="text-white"/>
             </div>
             <h1 className="text-xl font-bold text-white">Turnos</h1>
           </div>
-          <button onClick={logout} className="text-gray-500 hover:text-red-400 p-2"><LogOut size={18}/></button>
+          <button onClick={logout} className="text-neutral-700 hover:text-red-400 p-2 transition-colors"><LogOut size={18}/></button>
         </div>
       </header>
 
       <main className="max-w-5xl mx-auto px-6 py-8">
-        {/* Filtros */}
         <div className="flex flex-col sm:flex-row gap-3 mb-6">
           <input type="date" value={filtroFecha} onChange={e => setFiltroFecha(e.target.value)}
             className="input-field w-auto"/>
@@ -76,31 +75,31 @@ export default function GymTurnos() {
         </div>
 
         {cargando ? (
-          <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse"/>)}</div>
+          <div className="space-y-3">{[1,2,3,4].map(i => <div key={i} className="h-16 bg-neutral-950 rounded-xl animate-pulse"/>)}</div>
         ) : turnos.length === 0 ? (
           <div className="card text-center py-16">
-            <Calendar className="text-gray-700 mx-auto mb-4" size={48}/>
-            <p className="text-gray-500">No hay turnos para este día</p>
+            <Calendar className="text-neutral-800 mx-auto mb-4" size={48}/>
+            <p className="text-neutral-600">No hay turnos para este día</p>
           </div>
         ) : (
           <div className="card overflow-hidden p-0">
             <table className="w-full">
-              <thead className="bg-gray-800/50">
+              <thead className="bg-neutral-900/50">
                 <tr>
-                  <th className="text-left px-4 py-3 text-gray-400 text-sm font-medium">Cliente</th>
-                  <th className="text-left px-4 py-3 text-gray-400 text-sm font-medium">Horario</th>
-                  <th className="text-left px-4 py-3 text-gray-400 text-sm font-medium">Estado</th>
-                  <th className="text-left px-4 py-3 text-gray-400 text-sm font-medium">Acción</th>
+                  <th className="text-left px-4 py-3 text-neutral-500 text-sm font-medium">Cliente</th>
+                  <th className="text-left px-4 py-3 text-neutral-500 text-sm font-medium">Horario</th>
+                  <th className="text-left px-4 py-3 text-neutral-500 text-sm font-medium">Estado</th>
+                  <th className="text-left px-4 py-3 text-neutral-500 text-sm font-medium">Acción</th>
                 </tr>
               </thead>
               <tbody>
                 {turnos.map((t, i) => (
-                  <tr key={t.id} className={`border-t border-gray-800 ${i % 2 === 0 ? '' : 'bg-gray-800/20'}`}>
+                  <tr key={t.id} className={`border-t border-neutral-900 ${i % 2 === 0 ? '' : 'bg-neutral-950/50'}`}>
                     <td className="px-4 py-3">
                       <p className="text-white text-sm font-medium">{t.nombre} {t.apellido}</p>
-                      <p className="text-gray-500 text-xs">{t.email}</p>
+                      <p className="text-neutral-600 text-xs">{t.email}</p>
                     </td>
-                    <td className="px-4 py-3 text-gray-300 text-sm">
+                    <td className="px-4 py-3 text-neutral-400 text-sm">
                       {t.hora_inicio?.slice(0,5)} - {t.hora_fin?.slice(0,5)}
                     </td>
                     <td className="px-4 py-3">
@@ -110,11 +109,11 @@ export default function GymTurnos() {
                       {t.estado === 'confirmada' && (
                         <div className="flex gap-2">
                           <button onClick={() => marcarAsistencia(t.id, 'asistio')}
-                            className="text-gray-500 hover:text-green-400 transition-colors" title="Asistió">
+                            className="text-neutral-600 hover:text-green-400 transition-colors" title="Asistió">
                             <CheckCircle size={18}/>
                           </button>
                           <button onClick={() => marcarAsistencia(t.id, 'ausente')}
-                            className="text-gray-500 hover:text-red-400 transition-colors" title="Ausente">
+                            className="text-neutral-600 hover:text-red-400 transition-colors" title="Ausente">
                             <XCircle size={18}/>
                           </button>
                         </div>

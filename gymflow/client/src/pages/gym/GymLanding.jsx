@@ -5,17 +5,16 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
-// ─── AuthForm FUERA del componente para evitar re-mounts en cada keystroke ───
 function AuthForm({ modo, setModo, formLogin, setFormLogin, formReg, setFormReg,
   verPass, setVerPass, enviando, handleLogin, handleRegistro, color, gym, compact }) {
   return (
-    <div className={compact ? '' : 'bg-gray-900 border border-gray-800 rounded-2xl p-6 shadow-2xl'}>
+    <div className={compact ? '' : 'bg-neutral-950 border border-neutral-800 rounded-2xl p-6 shadow-2xl'}>
       {!compact && (
         <div className="text-center mb-5">
           {gym.logo_url
             ? <img src={gym.logo_url} alt={gym.nombre} className="h-14 mx-auto object-contain mb-3" />
-            : <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3" style={{ backgroundColor: color + '25' }}>
-                <Dumbbell size={26} style={{ color }} />
+            : <div className="w-14 h-14 rounded-2xl mx-auto flex items-center justify-center mb-3 bg-neutral-900 border border-neutral-800">
+                <Dumbbell size={26} className="text-white" />
               </div>
           }
           <h2 className="text-lg font-bold text-white">
@@ -23,10 +22,10 @@ function AuthForm({ modo, setModo, formLogin, setFormLogin, formReg, setFormReg,
           </h2>
         </div>
       )}
-      <div className="flex bg-gray-800 rounded-xl p-1 mb-4">
+      <div className="flex bg-neutral-900 rounded-xl p-1 mb-4">
         {['login','registro'].map(m => (
           <button key={m} type="button" onClick={() => setModo(m)}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${modo === m ? 'bg-gray-700 text-white' : 'text-gray-400 hover:text-white'}`}>
+            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-colors ${modo === m ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-white'}`}>
             {m === 'login' ? 'Ingresar' : 'Registrarse'}
           </button>
         ))}
@@ -35,30 +34,30 @@ function AuthForm({ modo, setModo, formLogin, setFormLogin, formReg, setFormReg,
       {modo === 'login' ? (
         <form onSubmit={handleLogin} className="space-y-3">
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Email</label>
+            <label className="block text-sm text-neutral-400 mb-1.5">Email</label>
             <input
               type="email"
               value={formLogin.email}
               onChange={e => setFormLogin(f => ({...f, email: e.target.value}))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
+              className="input-field w-full"
               placeholder="tu@email.com"
               required
               autoComplete="email"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1.5">Contraseña</label>
+            <label className="block text-sm text-neutral-400 mb-1.5">Contraseña</label>
             <div className="relative">
               <input
                 type={verPass ? 'text' : 'password'}
                 value={formLogin.password}
                 onChange={e => setFormLogin(f => ({...f, password: e.target.value}))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-11 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 transition-colors"
+                className="input-field w-full pr-10"
                 placeholder="••••••••"
                 required
                 autoComplete="current-password"
               />
-              <button type="button" onClick={() => setVerPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+              <button type="button" onClick={() => setVerPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white">
                 {verPass ? <EyeOff size={16}/> : <Eye size={16}/>}
               </button>
             </div>
@@ -73,64 +72,64 @@ function AuthForm({ modo, setModo, formLogin, setFormLogin, formReg, setFormReg,
         <form onSubmit={handleRegistro} className="space-y-3">
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Nombre *</label>
+              <label className="block text-sm text-neutral-400 mb-1">Nombre *</label>
               <input
                 value={formReg.nombre}
                 onChange={e => setFormReg(f => ({...f, nombre: e.target.value}))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 text-sm"
+                className="input-field text-sm"
                 placeholder="Juan"
                 required
                 autoComplete="given-name"
               />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1">Apellido</label>
+              <label className="block text-sm text-neutral-400 mb-1">Apellido</label>
               <input
                 value={formReg.apellido}
                 onChange={e => setFormReg(f => ({...f, apellido: e.target.value}))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 text-sm"
+                className="input-field text-sm"
                 placeholder="Pérez"
                 autoComplete="family-name"
               />
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Email *</label>
+            <label className="block text-sm text-neutral-400 mb-1">Email *</label>
             <input
               type="email"
               value={formReg.email}
               onChange={e => setFormReg(f => ({...f, email: e.target.value}))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 text-sm"
+              className="input-field text-sm"
               placeholder="tu@email.com"
               required
               autoComplete="email"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Contraseña *</label>
+            <label className="block text-sm text-neutral-400 mb-1">Contraseña *</label>
             <div className="relative">
               <input
                 type={verPass ? 'text' : 'password'}
                 value={formReg.password}
                 onChange={e => setFormReg(f => ({...f, password: e.target.value}))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 pr-10 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 text-sm"
+                className="input-field text-sm pr-10"
                 placeholder="Mínimo 6 caracteres"
                 required
                 minLength={6}
                 autoComplete="new-password"
               />
-              <button type="button" onClick={() => setVerPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+              <button type="button" onClick={() => setVerPass(v => !v)} className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white">
                 {verPass ? <EyeOff size={14}/> : <Eye size={14}/>}
               </button>
             </div>
           </div>
           <div>
-            <label className="block text-sm text-gray-300 mb-1">Teléfono</label>
+            <label className="block text-sm text-neutral-400 mb-1">Teléfono</label>
             <input
               type="tel"
               value={formReg.telefono}
               onChange={e => setFormReg(f => ({...f, telefono: e.target.value}))}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-2.5 text-white placeholder-gray-500 focus:outline-none focus:border-orange-500 text-sm"
+              className="input-field text-sm"
               placeholder="+54 9 11 1234-5678"
               autoComplete="tel"
             />
@@ -202,25 +201,24 @@ export default function GymLanding() {
   }, [formReg, gymSlug]);
 
   if (cargando) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
-      <div className="animate-spin rounded-full h-10 w-10 border-b-2" style={{ borderColor: '#f97316' }} />
+    <div className="min-h-screen bg-black flex items-center justify-center">
+      <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-white" />
     </div>
   );
 
   if (!gym) return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center">
+    <div className="min-h-screen bg-black flex items-center justify-center">
       <div className="text-center px-4">
-        <Dumbbell className="text-gray-700 mx-auto mb-4" size={48} />
+        <Dumbbell className="text-neutral-800 mx-auto mb-4" size={48} />
         <p className="text-white text-xl font-bold">Gimnasio no encontrado</p>
-        <p className="text-gray-500 mt-2 text-sm">El link no existe o el gimnasio está inactivo.</p>
-        <button onClick={() => navigate('/')} className="mt-6 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-orange-500">Ir al inicio</button>
+        <p className="text-neutral-600 mt-2 text-sm">El link no existe o el gimnasio está inactivo.</p>
+        <button onClick={() => navigate('/')} className="mt-6 px-5 py-2.5 rounded-xl text-sm font-bold text-white bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 transition-all">Ir al inicio</button>
       </div>
     </div>
   );
 
-  const color = gym.color_primario || '#f97316';
+  const color = gym.color_primario || '#3b82f6';
 
-  // Planes dinámicos del gym
   const planLabel = { '1_dia':'1 día/semana','2_dias':'2 días/semana','3_dias':'3 días/semana','4_dias':'4 días/semana','5_dias':'5 días/semana','libre':'Acceso libre' };
   const planFeatures = {
     '1_dia':['1 clase semanal','Reservas online','Acceso al app'],
@@ -251,27 +249,26 @@ export default function GymLanding() {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-950 text-white">
+    <div className="min-h-screen bg-black text-white">
       {/* NAVBAR */}
-      <nav className="fixed top-0 left-0 right-0 z-50 bg-gray-950/95 backdrop-blur border-b border-gray-800/50">
+      <nav className="fixed top-0 left-0 right-0 z-50 bg-black/95 backdrop-blur border-b border-neutral-900/50">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16">
           <div className="flex items-center gap-3">
             {gym.logo_url
               ? <img src={gym.logo_url} alt={gym.nombre} className="h-9 w-9 object-contain rounded-lg" />
-              : <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: color+'25' }}>
-                  <Dumbbell size={18} style={{ color }} />
+              : <div className="w-9 h-9 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+                  <Dumbbell size={18} className="text-white" />
                 </div>
             }
             <span className="font-black text-lg">{gym.nombre}</span>
           </div>
-          <div className="hidden md:flex items-center gap-6 text-sm text-gray-400">
+          <div className="hidden md:flex items-center gap-6 text-sm text-neutral-500">
             <a href="#beneficios" className="hover:text-white transition-colors">Beneficios</a>
             {planes.length > 0 && <a href="#planes" className="hover:text-white transition-colors">Planes</a>}
-            {gym.instagram && <a href={`https://instagram.com/${gym.instagram}`} target="_blank" rel="noopener" className="hover:text-pink-400 transition-colors">Instagram</a>}
+            {gym.instagram && <a href={`https://instagram.com/${gym.instagram}`} target="_blank" rel="noopener" className="hover:text-white transition-colors">Instagram</a>}
           </div>
           <button onClick={() => { setAuthModal(true); setModo('login'); }}
-            className="px-4 py-2 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-            style={{ backgroundColor: color }}>
+            className="px-4 py-2 rounded-xl text-sm font-bold text-white bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 transition-all">
             Ingresar
           </button>
         </div>
@@ -279,19 +276,18 @@ export default function GymLanding() {
 
       {/* HERO */}
       <section className="pt-16 min-h-screen flex items-center relative overflow-hidden">
-        <div className="absolute inset-0 z-0" style={{ background: `radial-gradient(ellipse at 60% 50%, ${color}18 0%, transparent 70%)` }} />
+        <div className="absolute inset-0 z-0" style={{ background: `radial-gradient(ellipse at 60% 50%, ${color}12 0%, transparent 70%)` }} />
         <div className="max-w-6xl mx-auto px-4 sm:px-6 w-full z-10 py-16">
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div>
-              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border mb-6 text-sm"
-                style={{ borderColor:color+'50', backgroundColor:color+'15', color }}>
+              <div className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full border border-neutral-800 bg-neutral-950 mb-6 text-sm text-neutral-400">
                 <Star size={13} /> Tu gym en el bolsillo
               </div>
               <h1 className="text-4xl sm:text-5xl font-black leading-tight mb-4">
                 Bienvenido a<br />
                 <span style={{ color }}>{gym.nombre}</span>
               </h1>
-              <p className="text-gray-400 text-lg leading-relaxed mb-6">
+              <p className="text-neutral-500 text-lg leading-relaxed mb-6">
                 {gym.texto_bienvenida || 'Reservá turnos, seguí tus rutinas y controlá tus pagos — todo desde el celular.'}
               </p>
               <div className="flex gap-3 flex-wrap">
@@ -301,53 +297,52 @@ export default function GymLanding() {
                   Empezar ahora
                 </button>
                 <button onClick={() => { setModo('login'); setAuthModal(true); }}
-                  className="px-6 py-3 rounded-xl font-bold text-gray-300 border border-gray-700 hover:border-gray-500 transition-all">
+                  className="px-6 py-3 rounded-xl font-bold text-neutral-400 border border-neutral-800 hover:border-neutral-600 hover:text-white transition-all">
                   Ya tengo cuenta
                 </button>
               </div>
               <div className="flex items-center gap-4 mt-8">
                 {gym.instagram && (
                   <a href={`https://instagram.com/${gym.instagram}`} target="_blank" rel="noopener"
-                    className="flex items-center gap-2 text-gray-500 hover:text-pink-400 transition-colors text-sm">
+                    className="flex items-center gap-2 text-neutral-600 hover:text-neutral-300 transition-colors text-sm">
                     <Instagram size={16} /> @{gym.instagram}
                   </a>
                 )}
                 {gym.whatsapp && (
                   <a href={`https://wa.me/${gym.whatsapp.replace(/\D/g,'')}`} target="_blank" rel="noopener"
-                    className="flex items-center gap-2 text-gray-500 hover:text-green-400 transition-colors text-sm">
+                    className="flex items-center gap-2 text-neutral-600 hover:text-green-400 transition-colors text-sm">
                     <Phone size={16} /> WhatsApp
                   </a>
                 )}
               </div>
             </div>
 
-            {/* Auth card desktop */}
             <div className="hidden lg:block" id="auth-section">
               <AuthForm {...authProps} />
-              <p className="text-center text-gray-700 text-xs mt-3">Powered by TGB · Tu Gym Bro</p>
+              <p className="text-center text-neutral-800 text-xs mt-3">Powered by TGB · Tu Gym Bro</p>
             </div>
           </div>
         </div>
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-gray-600 animate-bounce">
+        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-neutral-800 animate-bounce">
           <ChevronDown size={24} />
         </div>
       </section>
 
       {/* BENEFICIOS */}
-      <section id="beneficios" className="py-20 border-t border-gray-800/50">
+      <section id="beneficios" className="py-20 border-t border-neutral-900">
         <div className="max-w-6xl mx-auto px-4 sm:px-6">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-black mb-3">Todo lo que necesitás</h2>
-            <p className="text-gray-400">en un solo lugar, desde tu celular</p>
+            <p className="text-neutral-500">en un solo lugar, desde tu celular</p>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {features.map(({ icon: Icon, title, desc }) => (
-              <div key={title} className="bg-gray-900 border border-gray-800 rounded-2xl p-5 hover:border-gray-700 transition-all">
-                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3" style={{ backgroundColor: color+'20' }}>
+              <div key={title} className="bg-neutral-950 border border-neutral-900 rounded-2xl p-5 hover:border-neutral-700 transition-all">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center mb-3 bg-neutral-900">
                   <Icon size={20} style={{ color }} />
                 </div>
                 <h3 className="font-bold text-white mb-1 text-sm">{title}</h3>
-                <p className="text-gray-500 text-xs leading-relaxed">{desc}</p>
+                <p className="text-neutral-600 text-xs leading-relaxed">{desc}</p>
               </div>
             ))}
           </div>
@@ -356,11 +351,11 @@ export default function GymLanding() {
 
       {/* PLANES */}
       {planes.length > 0 && (
-        <section id="planes" className="py-20 border-t border-gray-800/50">
+        <section id="planes" className="py-20 border-t border-neutral-900">
           <div className="max-w-6xl mx-auto px-4 sm:px-6">
             <div className="text-center mb-12">
               <h2 className="text-3xl font-black mb-3">Planes</h2>
-              <p className="text-gray-400">Elegí el que mejor se adapte a vos</p>
+              <p className="text-neutral-500">Elegí el que mejor se adapte a vos</p>
             </div>
             <div className={`grid gap-6 max-w-4xl mx-auto ${
               planes.length === 1 ? 'max-w-sm' :
@@ -369,40 +364,40 @@ export default function GymLanding() {
               'sm:grid-cols-3'
             }`}>
               {planes.map(plan => (
-                <div key={plan.key} className="bg-gray-900 rounded-2xl p-6 border-2 relative"
-                  style={{ borderColor: plan.destacado ? color : '#1f2937' }}>
+                <div key={plan.key} className="bg-neutral-950 rounded-2xl p-6 border-2 relative"
+                  style={{ borderColor: plan.destacado ? color : '#262626' }}>
                   {plan.destacado && (
                     <span className="absolute -top-3 left-1/2 -translate-x-1/2 text-white text-xs font-bold px-3 py-1 rounded-full"
                       style={{ backgroundColor: color }}>MÁS POPULAR</span>
                   )}
                   <h3 className="font-bold text-white mb-2 text-sm">{plan.label}</h3>
                   {plan.precio
-                    ? <p className="text-2xl font-black mb-1" style={{ color }}>${parseInt(plan.precio).toLocaleString('es-AR')}</p>
-                    : <p className="text-lg font-bold text-gray-400 mb-1">Consultá</p>
+                    ? <p className="text-2xl font-black mb-1 text-white">${parseInt(plan.precio).toLocaleString('es-AR')}</p>
+                    : <p className="text-lg font-bold text-neutral-500 mb-1">Consultá</p>
                   }
-                  <p className="text-gray-500 text-xs mb-4">por mes</p>
+                  <p className="text-neutral-600 text-xs mb-4">por mes</p>
                   <ul className="space-y-2 mb-4">
                     {plan.features.map(f => (
-                      <li key={f} className="flex items-center gap-2 text-xs text-gray-400">
+                      <li key={f} className="flex items-center gap-2 text-xs text-neutral-500">
                         <CheckCircle size={12} className="text-green-500 flex-shrink-0" /> {f}
                       </li>
                     ))}
                   </ul>
                   <button onClick={() => { setModo('registro'); setAuthModal(true); }}
                     className="w-full py-2.5 rounded-xl text-sm font-bold text-white transition-all hover:opacity-90"
-                    style={{ backgroundColor: plan.destacado ? color : '#374151' }}>
+                    style={{ backgroundColor: plan.destacado ? color : '#262626' }}>
                     Empezar
                   </button>
                 </div>
               ))}
             </div>
             {(gym.alias_transferencia || gym.nombre_titular) && (
-              <div className="max-w-md mx-auto mt-8 bg-gray-900 border border-gray-800 rounded-2xl p-5">
-                <p className="text-xs text-gray-500 uppercase tracking-wider mb-3">💳 Datos para transferir</p>
+              <div className="max-w-md mx-auto mt-8 bg-neutral-950 border border-neutral-900 rounded-2xl p-5">
+                <p className="text-xs text-neutral-600 uppercase tracking-wider mb-3">💳 Datos para transferir</p>
                 <div className="grid grid-cols-2 gap-3 text-sm">
-                  {gym.alias_transferencia && <div><p className="text-gray-600 text-xs">Alias</p><p className="text-white font-bold">{gym.alias_transferencia}</p></div>}
-                  {gym.nombre_titular && <div><p className="text-gray-600 text-xs">Titular</p><p className="text-white">{gym.nombre_titular}</p></div>}
-                  {gym.banco && <div><p className="text-gray-600 text-xs">Banco</p><p className="text-white">{gym.banco}</p></div>}
+                  {gym.alias_transferencia && <div><p className="text-neutral-700 text-xs">Alias</p><p className="text-white font-bold">{gym.alias_transferencia}</p></div>}
+                  {gym.nombre_titular && <div><p className="text-neutral-700 text-xs">Titular</p><p className="text-white">{gym.nombre_titular}</p></div>}
+                  {gym.banco && <div><p className="text-neutral-700 text-xs">Banco</p><p className="text-white">{gym.banco}</p></div>}
                 </div>
               </div>
             )}
@@ -411,33 +406,33 @@ export default function GymLanding() {
       )}
 
       {/* FOOTER */}
-      <footer className="border-t border-gray-800 py-8">
+      <footer className="border-t border-neutral-900 py-8">
         <div className="max-w-6xl mx-auto px-4 sm:px-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2">
             <Dumbbell size={16} style={{ color }} />
             <span className="font-bold text-white">{gym.nombre}</span>
           </div>
-          <p className="text-gray-600 text-sm">Powered by <span className="text-orange-500 font-semibold">TGB · Tu Gym Bro</span></p>
+          <p className="text-neutral-700 text-sm">Powered by <span className="text-neutral-400 font-semibold">TGB · Tu Gym Bro</span></p>
         </div>
       </footer>
 
       {/* AUTH MODAL */}
       {authModal && (
-        <div className="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-4"
+        <div className="fixed inset-0 bg-black/90 z-[60] flex items-end sm:items-center justify-center p-4"
           onClick={() => setAuthModal(false)}>
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 w-full max-w-md max-h-[90vh] overflow-y-auto"
             onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between mb-4">
               <div className="flex items-center gap-2">
                 {gym.logo_url
                   ? <img src={gym.logo_url} alt={gym.nombre} className="h-8 w-8 object-contain rounded-lg" />
-                  : <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ backgroundColor: color+'25' }}>
-                      <Dumbbell size={15} style={{ color }} />
+                  : <div className="w-8 h-8 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center">
+                      <Dumbbell size={15} className="text-white" />
                     </div>
                 }
                 <span className="font-bold text-white text-sm">{gym.nombre}</span>
               </div>
-              <button onClick={() => setAuthModal(false)} className="text-gray-500 hover:text-white p-1"><X size={20}/></button>
+              <button onClick={() => setAuthModal(false)} className="text-neutral-600 hover:text-white p-1 transition-colors"><X size={20}/></button>
             </div>
             <AuthForm {...authProps} compact />
           </div>

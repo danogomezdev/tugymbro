@@ -22,14 +22,12 @@ export default function LoginGym() {
   const [tokenTemp, setTokenTemp] = useState(null);
   const [usuarioTemp, setUsuarioTemp] = useState(null);
 
-  // Cargar datos del gym
   useEffect(() => {
     api.get(`/public/gym/${gymSlug}`)
       .then(r => setGym(r.data.gym))
       .catch(() => toast.error('Gimnasio no encontrado'));
   }, [gymSlug]);
 
-  // Redirigir si ya está logueado — solo cuando auth terminó de cargar
   useEffect(() => {
     if (authCargando) return;
     if (!usuario) return;
@@ -58,7 +56,6 @@ export default function LoginGym() {
         navigate(`/gym/${gymSlug}/home`);
       }
     } catch (err) {
-      console.error('LOGIN ERROR:', JSON.stringify(err.response?.data));
       toast.error(err.response?.data?.error || 'Credenciales incorrectas');
     } finally {
       setCargando(false);
@@ -89,31 +86,30 @@ export default function LoginGym() {
     }
   };
 
-  const color = gym?.color_primario || '#f97316';
+  const color = gym?.color_primario || '#3b82f6';
 
   if (debeCambiar) {
     return (
-      <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+      <div className="min-h-screen bg-black flex items-center justify-center p-4">
         <div className="w-full max-w-md">
           <div className="text-center mb-8">
-            <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-              style={{ backgroundColor: `${color}20` }}>
-              <Lock size={32} style={{ color }} />
+            <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-900 border border-neutral-800 rounded-2xl mb-4">
+              <Lock size={32} className="text-white" />
             </div>
             <h1 className="text-2xl font-black text-white">Cambiá tu contraseña</h1>
-            <p className="text-gray-400 text-sm mt-2 max-w-xs mx-auto">
+            <p className="text-neutral-500 text-sm mt-2 max-w-xs mx-auto">
               Por seguridad, necesitás elegir una contraseña nueva antes de continuar.
             </p>
           </div>
-          <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+          <div className="bg-neutral-950 rounded-2xl p-8 border border-neutral-800">
             <form onSubmit={handleCambiarPassword} className="space-y-4">
               <div>
-                <label className="block text-sm text-gray-300 mb-1.5">Nueva contraseña</label>
+                <label className="block text-sm text-neutral-400 mb-1.5">Nueva contraseña</label>
                 <input type="password" value={nuevaPass} onChange={e => setNuevaPass(e.target.value)}
                   className="input-field w-full" placeholder="Mínimo 6 caracteres" autoFocus required />
               </div>
               <div>
-                <label className="block text-sm text-gray-300 mb-1.5">Repetir contraseña</label>
+                <label className="block text-sm text-neutral-400 mb-1.5">Repetir contraseña</label>
                 <input type="password" value={confirmarPass} onChange={e => setConfirmarPass(e.target.value)}
                   className="input-field w-full" placeholder="Repetí la contraseña" required />
                 {confirmarPass.length > 0 && (
@@ -124,63 +120,60 @@ export default function LoginGym() {
               </div>
               <button type="submit"
                 disabled={guardandoPass || nuevaPass !== confirmarPass || nuevaPass.length < 6}
-                className="w-full py-3 rounded-xl font-bold text-white transition-all disabled:opacity-40"
-                style={{ backgroundColor: color }}>
+                className="w-full py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all disabled:opacity-40">
                 {guardandoPass ? 'Guardando...' : 'Guardar y entrar'}
               </button>
             </form>
           </div>
-          <p className="text-center text-gray-700 text-xs mt-4">Powered by TGB · Tu Gym Bro</p>
+          <p className="text-center text-neutral-800 text-xs mt-4">Powered by TGB · Tu Gym Bro</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-950 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-black flex items-center justify-center p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 rounded-2xl mb-4"
-            style={{ backgroundColor: `${color}20` }}>
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-neutral-900 border border-neutral-800 rounded-2xl mb-4">
             {gym?.logo_url
               ? <img src={gym.logo_url} alt={gym.nombre} className="w-10 h-10 object-contain" />
-              : <Dumbbell size={32} style={{ color }} />
+              : <Dumbbell size={32} className="text-white" />
             }
           </div>
           <h1 className="text-2xl font-black text-white">{gym?.nombre || gymSlug}</h1>
-          <p className="text-gray-500 text-sm mt-1">Ingresá a tu cuenta</p>
+          <p className="text-neutral-600 text-sm mt-1">Ingresá a tu cuenta</p>
         </div>
 
-        <div className="bg-gray-900 rounded-2xl p-8 border border-gray-800">
+        <div className="bg-neutral-950 rounded-2xl p-8 border border-neutral-800">
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">Email</label>
+              <label className="block text-sm text-neutral-400 mb-1.5">Email</label>
               <input type="email" value={email} onChange={e => setEmail(e.target.value)}
                 className="input-field w-full" placeholder="tu@email.com" required />
             </div>
             <div>
-              <label className="block text-sm text-gray-300 mb-1.5">Contraseña</label>
+              <label className="block text-sm text-neutral-400 mb-1.5">Contraseña</label>
               <div className="relative">
                 <input type={verPass ? 'text' : 'password'} value={password} onChange={e => setPassword(e.target.value)}
                   className="input-field w-full pr-10" placeholder="••••••••" required />
                 <button type="button" onClick={() => setVerPass(!verPass)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white">
                   {verPass ? <EyeOff size={16} /> : <Eye size={16} />}
                 </button>
               </div>
             </div>
             <button type="submit" disabled={cargando}
-              className="w-full py-3 rounded-xl font-bold text-white transition-all mt-2"
-              style={{ backgroundColor: color }}>
+              className="w-full py-3 rounded-xl font-bold text-white bg-blue-600 hover:bg-blue-500 transition-all mt-2 disabled:opacity-50">
               {cargando ? 'Ingresando...' : 'Ingresar'}
             </button>
           </form>
-          <p className="text-center text-gray-500 text-sm mt-4">
+          <p className="text-center text-neutral-600 text-sm mt-4">
             ¿No tenés cuenta?{' '}
-            <Link to={`/gym/${gymSlug}/registro`} className="text-orange-400 hover:text-orange-300">Registrate</Link>
+            <Link to={`/gym/${gymSlug}/registro`} className="text-neutral-300 hover:text-white transition-colors">Registrate</Link>
           </p>
         </div>
-        <p className="text-center text-gray-700 text-xs mt-4">Powered by TGB · Tu Gym Bro</p>
+        <p className="text-center text-neutral-800 text-xs mt-4">Powered by TGB · Tu Gym Bro</p>
       </div>
     </div>
   );

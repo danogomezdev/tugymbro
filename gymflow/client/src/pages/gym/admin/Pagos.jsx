@@ -51,17 +51,23 @@ export default function GymPagos() {
 
   const pendientesCount = solicitudes.filter(s => s.estado === 'pendiente').length;
 
+  const filtroStyles = {
+    pendiente: 'bg-neutral-900 border-neutral-700 text-white',
+    aprobado:  'bg-neutral-900 border-neutral-700 text-white',
+    rechazado: 'bg-neutral-900 border-neutral-700 text-white',
+  };
+
   return (
-    <div className="min-h-screen bg-gray-950">
-      <header className="bg-gray-900 border-b border-gray-800 px-6 py-4">
+    <div className="min-h-screen bg-black">
+      <header className="bg-neutral-950 border-b border-neutral-900 px-6 py-4">
         <div className="max-w-5xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <button onClick={() => navigate(`/gym/${gymSlug}/admin`)} className="text-gray-400 hover:text-white">
+            <button onClick={() => navigate(`/gym/${gymSlug}/admin`)} className="text-neutral-600 hover:text-white transition-colors">
               <ArrowLeft size={20}/>
             </button>
             <h1 className="text-xl font-bold text-white">Pagos</h1>
           </div>
-          <button onClick={logout} className="text-gray-500 hover:text-red-400 p-2"><LogOut size={18}/></button>
+          <button onClick={logout} className="text-neutral-700 hover:text-red-400 p-2 transition-colors"><LogOut size={18}/></button>
         </div>
       </header>
 
@@ -69,23 +75,25 @@ export default function GymPagos() {
         <div className="flex gap-2 mb-6">
           {['pendiente', 'aprobado', 'rechazado'].map(e => (
             <button key={e} onClick={() => setFiltro(e)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors ${
-                filtro === e ? 'bg-orange-500 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'
+              className={`px-4 py-2 rounded-lg text-sm font-medium capitalize transition-colors border ${
+                filtro === e
+                  ? 'bg-neutral-800 border-neutral-700 text-white'
+                  : 'bg-transparent border-neutral-900 text-neutral-600 hover:text-neutral-300 hover:border-neutral-800'
               }`}>
               {e}
               {e === 'pendiente' && pendientesCount > 0 && (
-                <span className="ml-2 bg-red-500 text-white text-xs rounded-full px-1.5 py-0.5">{pendientesCount}</span>
+                <span className="ml-2 bg-blue-600 text-white text-xs rounded-full px-1.5 py-0.5">{pendientesCount}</span>
               )}
             </button>
           ))}
         </div>
 
         {cargando ? (
-          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 bg-gray-800 rounded-xl animate-pulse"/>)}</div>
+          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-24 bg-neutral-950 rounded-xl animate-pulse"/>)}</div>
         ) : solicitudes.length === 0 ? (
           <div className="card text-center py-16">
-            <Clock className="text-gray-700 mx-auto mb-3" size={48}/>
-            <p className="text-gray-500">No hay solicitudes {filtro === 'pendiente' ? 'pendientes' : filtro === 'aprobado' ? 'aprobadas' : 'rechazadas'}</p>
+            <Clock className="text-neutral-800 mx-auto mb-3" size={48}/>
+            <p className="text-neutral-600">No hay solicitudes {filtro === 'pendiente' ? 'pendientes' : filtro === 'aprobado' ? 'aprobadas' : 'rechazadas'}</p>
           </div>
         ) : (
           <div className="space-y-4">
@@ -94,25 +102,25 @@ export default function GymPagos() {
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-4">
                     <div className={`p-2.5 rounded-lg flex-shrink-0 ${
-                      s.estado === 'pendiente' ? 'bg-yellow-500/10' :
-                      s.estado === 'aprobado'  ? 'bg-green-500/10'  : 'bg-red-500/10'
+                      s.estado === 'pendiente' ? 'bg-neutral-800' :
+                      s.estado === 'aprobado'  ? 'bg-green-950/50'  : 'bg-red-950/50'
                     }`}>
                       <Clock className={
-                        s.estado === 'pendiente' ? 'text-yellow-500' :
+                        s.estado === 'pendiente' ? 'text-neutral-400' :
                         s.estado === 'aprobado'  ? 'text-green-500'  : 'text-red-500'
                       } size={20}/>
                     </div>
                     <div>
                       <p className="font-bold text-white">{s.nombre} {s.apellido}</p>
-                      <p className="text-gray-400 text-sm">{s.email}</p>
+                      <p className="text-neutral-500 text-sm">{s.email}</p>
                       <div className="flex items-center gap-3 mt-1">
-                        <span className="text-xs bg-orange-500/10 text-orange-400 px-2 py-0.5 rounded-full">
+                        <span className="text-xs bg-neutral-900 border border-neutral-800 text-neutral-400 px-2 py-0.5 rounded-full">
                           {planLabels[s.plan] || s.plan}
                         </span>
                         {s.monto && (
-                          <span className="text-xs text-gray-400">${parseFloat(s.monto).toLocaleString('es-AR')}</span>
+                          <span className="text-xs text-neutral-500">${parseFloat(s.monto).toLocaleString('es-AR')}</span>
                         )}
-                        <span className="text-xs text-gray-500">
+                        <span className="text-xs text-neutral-700">
                           {format(new Date(s.creado_en), "d MMM HH:mm", { locale: es })}
                         </span>
                       </div>
@@ -125,18 +133,18 @@ export default function GymPagos() {
                   <div className="flex items-center gap-2 flex-shrink-0">
                     {s.comprobante_url && (
                       <button onClick={() => window.open(s.comprobante_url, '_blank')}
-                        className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white border border-gray-700 hover:border-gray-500 px-3 py-2 rounded-lg transition-colors">
+                        className="flex items-center gap-1.5 text-sm text-neutral-500 hover:text-white border border-neutral-800 hover:border-neutral-600 px-3 py-2 rounded-lg transition-colors">
                         <Eye size={15}/> Ver comprobante
                       </button>
                     )}
                     {s.estado === 'pendiente' && (
                       <>
                         <button onClick={() => aprobar(s.id)}
-                          className="flex items-center gap-1.5 text-sm bg-green-600 hover:bg-green-700 text-white px-3 py-2 rounded-lg transition-colors">
+                          className="flex items-center gap-1.5 text-sm bg-green-700 hover:bg-green-600 text-white px-3 py-2 rounded-lg transition-colors">
                           <CheckCircle size={15}/> Aprobar
                         </button>
                         <button onClick={() => setModalRechazo(s.id)}
-                          className="flex items-center gap-1.5 text-sm bg-red-600 hover:bg-red-700 text-white px-3 py-2 rounded-lg transition-colors">
+                          className="flex items-center gap-1.5 text-sm bg-red-700 hover:bg-red-600 text-white px-3 py-2 rounded-lg transition-colors">
                           <XCircle size={15}/> Rechazar
                         </button>
                       </>
@@ -150,16 +158,16 @@ export default function GymPagos() {
       </main>
 
       {modalRechazo && (
-        <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-xl p-6 w-full max-w-md">
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4">
+          <div className="bg-neutral-950 border border-neutral-800 rounded-xl p-6 w-full max-w-md">
             <h3 className="font-bold text-white text-lg mb-4">Rechazar comprobante</h3>
-            <label className="block text-sm text-gray-300 mb-1.5">Motivo (visible para el cliente)</label>
+            <label className="block text-sm text-neutral-400 mb-1.5">Motivo (visible para el cliente)</label>
             <textarea value={motivo} onChange={e => setMotivo(e.target.value)}
               className="input-field resize-none" rows={3}
               placeholder="Ej: El comprobante no se ve con claridad"/>
             <div className="flex gap-3 mt-4">
               <button onClick={() => { setModalRechazo(null); setMotivo(''); }} className="btn-secondary flex-1">Cancelar</button>
-              <button onClick={rechazar} className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2.5 px-4 rounded-lg flex-1 transition-colors">Rechazar</button>
+              <button onClick={rechazar} className="bg-red-700 hover:bg-red-600 text-white font-semibold py-2.5 px-4 rounded-lg flex-1 transition-colors">Rechazar</button>
             </div>
           </div>
         </div>
