@@ -79,11 +79,11 @@ export default function Reservas() {
   };
 
   const reservasEstaSemana = misReservasSemana.filter(r => {
-    const f = new Date(r.fecha + 'T00:00:00');
+    const f = new Date(r.fecha.slice(0,10) + 'T12:00:00');
     return f >= inicioSemana && f <= addDays(inicioSemana, 6);
   });
 
-  const tengoReservaEseDia = (fecha) => misReservasSemana.some(r => isSameDay(new Date(r.fecha + 'T00:00:00'), fecha));
+  const tengoReservaEseDia = (fecha) => misReservasSemana.some(r => isSameDay(new Date(r.fecha.slice(0,10) + 'T12:00:00'), fecha));
 
   const esDiaAbierto = (fecha) => {
     if (!gymConfig) return true;

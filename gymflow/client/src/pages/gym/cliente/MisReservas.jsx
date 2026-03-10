@@ -92,7 +92,7 @@ export default function MisReservas() {
                   <div className="bg-blue-950/50 p-2 rounded-lg"><Calendar className="text-blue-400" size={16} /></div>
                   <div>
                     <p className="font-semibold text-white text-sm capitalize">
-                      {r.fecha ? format(new Date(String(r.fecha).includes('T') ? r.fecha : r.fecha + 'T00:00:00'), "EEEE d 'de' MMMM", { locale: es }) : '-'}
+                      {r.fecha ? format(new Date(r.fecha.slice(0,10) + 'T12:00:00'), "EEEE d 'de' MMMM", { locale: es }) : '-'}
                     </p>
                     <div className="flex items-center gap-1 mt-0.5">
                       <Clock size={11} className="text-neutral-500" />

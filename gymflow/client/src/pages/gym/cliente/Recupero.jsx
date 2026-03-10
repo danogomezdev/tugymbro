@@ -61,7 +61,7 @@ export default function Recupero() {
   };
 
   const diasSemanaAusencia = modalAusencia ? (() => {
-    const fa = new Date(String(modalAusencia.fecha).includes('T') ? modalAusencia.fecha : modalAusencia.fecha + 'T00:00:00');
+    const fa = new Date(String(modalAusencia.fecha).includes('T') ? modalAusencia.fecha : modalAusencia.fecha.slice(0,10) + 'T12:00:00');
     const inicio = startOfWeek(fa, { weekStartsOn: 1 });
     return Array.from({ length: 6 }, (_, i) => addDays(inicio, i)).filter(d => d >= new Date());
   })() : [];
@@ -74,19 +74,19 @@ export default function Recupero() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-20">
+    <div className="min-h-screen bg-black pb-20">
       <NavbarCliente />
       <main className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-white mb-1">Recupero de clases</h1>
-        <p className="text-gray-500 text-sm mb-6">Si faltaste, podés recuperar en otro horario de la misma semana.</p>
+        <p className="text-neutral-500 text-sm mb-6">Si faltaste, podés recuperar en otro horario de la misma semana.</p>
 
         {cargando ? (
-          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />)}</div>
+          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-neutral-900 rounded-xl animate-pulse" />)}</div>
         ) : ausencias.length === 0 ? (
           <div className="card text-center py-12">
             <CheckCircle className="text-green-500 mx-auto mb-3" size={44} />
-            <p className="text-gray-400 font-medium">No tenés ausencias recientes</p>
-            <p className="text-gray-600 text-sm mt-1">¡Seguí así! 💪</p>
+            <p className="text-neutral-400 font-medium">No tenés ausencias recientes</p>
+            <p className="text-neutral-600 text-sm mt-1">¡Seguí así! 💪</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -96,9 +96,9 @@ export default function Recupero() {
                   <div className="bg-red-500/10 p-2 rounded-lg"><XCircle className="text-red-500" size={18} /></div>
                   <div>
                     <p className="font-semibold text-white text-sm capitalize">
-                      {a.fecha ? format(new Date(String(a.fecha).includes('T') ? a.fecha : a.fecha + 'T00:00:00'), "EEEE d 'de' MMMM", { locale: es }) : '-'}
+                      {a.fecha ? format(new Date(String(a.fecha).includes('T') ? a.fecha : a.fecha.slice(0,10) + 'T12:00:00'), "EEEE d 'de' MMMM", { locale: es }) : '-'}
                     </p>
-                    <p className="text-gray-400 text-xs">{a.hora_inicio?.slice(0,5)} - {a.hora_fin?.slice(0,5)}</p>
+                    <p className="text-neutral-400 text-xs">{a.hora_inicio?.slice(0,5)} - {a.hora_fin?.slice(0,5)}</p>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -117,19 +117,19 @@ export default function Recupero() {
 
       {modalAusencia && (
         <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 border border-gray-700 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto">
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 w-full max-w-md max-h-[85vh] overflow-y-auto">
             <h3 className="font-bold text-white mb-1">Solicitar recupero</h3>
-            <p className="text-gray-400 text-sm mb-5">
+            <p className="text-neutral-400 text-sm mb-5">
               Ausencia: <span className="text-white capitalize">
-                {modalAusencia.fecha ? format(new Date(String(modalAusencia.fecha).includes('T') ? modalAusencia.fecha : modalAusencia.fecha + 'T00:00:00'), "EEEE d 'de' MMMM", { locale: es }) : '-'}
+                {modalAusencia.fecha ? format(new Date(String(modalAusencia.fecha).includes('T') ? modalAusencia.fecha : modalAusencia.fecha.slice(0,10) + 'T12:00:00'), "EEEE d 'de' MMMM", { locale: es }) : '-'}
               </span>
             </p>
-            <p className="text-sm font-medium text-gray-300 mb-3">Elegí el día (misma semana):</p>
+            <p className="text-sm font-medium text-neutral-300 mb-3">Elegí el día (misma semana):</p>
             <div className="grid grid-cols-3 gap-2 mb-5">
               {diasSemanaAusencia.map(dia => (
                 <button key={dia.toISOString()} onClick={() => seleccionarDia(dia)}
                   className={`py-2 px-2 rounded-lg text-sm transition-colors text-center ${
-                    diaSeleccionado && isSameDay(dia, diaSeleccionado) ? 'bg-orange-500 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                    diaSeleccionado && isSameDay(dia, diaSeleccionado) ? 'bg-blue-600 text-white' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800'
                   }`}>
                   <span className="block font-medium capitalize">{format(dia, 'EEE', { locale: es })}</span>
                   <span className="text-xs">{format(dia, 'd/MM')}</span>
@@ -138,21 +138,21 @@ export default function Recupero() {
             </div>
             {diaSeleccionado && (
               <>
-                <p className="text-sm font-medium text-gray-300 mb-3">Elegí el horario:</p>
+                <p className="text-sm font-medium text-neutral-300 mb-3">Elegí el horario:</p>
                 {horariosDisponibles.length === 0 ? (
-                  <p className="text-gray-500 text-sm text-center py-4">No hay horarios disponibles ese día</p>
+                  <p className="text-neutral-500 text-sm text-center py-4">No hay horarios disponibles ese día</p>
                 ) : (
                   <div className="space-y-2 mb-5">
                     {horariosDisponibles.map(h => (
                       <button key={h.id} onClick={() => setHorarioSeleccionado(h.id)}
                         className={`w-full flex items-center justify-between px-4 py-3 rounded-lg transition-colors ${
-                          horarioSeleccionado === h.id ? 'bg-orange-500/20 border border-orange-500' : 'bg-gray-800 hover:bg-gray-700 border border-transparent'
+                          horarioSeleccionado === h.id ? 'bg-blue-950/50 border border-blue-600' : 'bg-neutral-900 hover:bg-neutral-800 border border-transparent'
                         }`}>
                         <div className="flex items-center gap-2">
-                          <Clock size={14} className="text-orange-500" />
+                          <Clock size={14} className="text-blue-400" />
                           <span className="text-white text-sm">{h.hora_inicio?.slice(0,5)} - {h.hora_fin?.slice(0,5)}</span>
                         </div>
-                        <span className="text-gray-400 text-xs">{h.disponibles} lugares</span>
+                        <span className="text-neutral-400 text-xs">{h.disponibles} lugares</span>
                       </button>
                     ))}
                   </div>
