@@ -22,7 +22,7 @@ const misReservas = async (req, res) => {
       `SELECT r.id, r.fecha, r.estado, r.creado_en,
               h.dia_semana, h.hora_inicio, h.hora_fin
        FROM reservas r
-       JOIN horarios h ON r.horario_id = h.id
+       LEFT JOIN horarios h ON r.horario_id = h.id
        WHERE r.usuario_id = $1 AND r.gimnasio_id = $2
          AND EXTRACT(MONTH FROM r.fecha) = $3
          AND EXTRACT(YEAR FROM r.fecha) = $4
