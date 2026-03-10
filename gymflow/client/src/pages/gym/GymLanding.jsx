@@ -5,6 +5,16 @@ import { useAuth } from '../../context/AuthContext';
 import api from '../../services/api';
 import toast from 'react-hot-toast';
 
+function esColorClaro(hex) {
+  if (!hex) return false;
+  const h = hex.replace('#', '');
+  if (h.length < 6) return false;
+  const r = parseInt(h.substring(0,2), 16) / 255;
+  const g = parseInt(h.substring(2,4), 16) / 255;
+  const b = parseInt(h.substring(4,6), 16) / 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 0.7;
+}
+
 function AuthForm({ modo, setModo, formLogin, setFormLogin, formReg, setFormReg,
   verPass, setVerPass, enviando, handleLogin, handleRegistro, color, gym, compact }) {
   return (
@@ -217,7 +227,8 @@ export default function GymLanding() {
     </div>
   );
 
-  const color = gym.color_primario || '#3b82f6';
+  const colorRaw = gym.color_primario || '#3b82f6';
+  const color = esColorClaro(colorRaw) ? '#3b82f6' : colorRaw;
 
   const planLabel = { '1_dia':'1 día/semana','2_dias':'2 días/semana','3_dias':'3 días/semana','4_dias':'4 días/semana','5_dias':'5 días/semana','libre':'Acceso libre' };
   const planFeatures = {

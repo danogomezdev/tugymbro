@@ -15,7 +15,7 @@ const formatFecha = (f) => {
 };
 
 const MiniGrafico = ({ datos }) => {
-  if (!datos || datos.length < 2) return <p className="text-gray-600 text-xs text-center py-2">Necesitás al menos 2 sesiones para ver el gráfico</p>;
+  if (!datos || datos.length < 2) return <p className="text-neutral-600 text-xs text-center py-2">Necesitás al menos 2 sesiones para ver el gráfico</p>;
   const pesos = datos.map(d => parseFloat(d.peso) || 0);
   const max = Math.max(...pesos), min = Math.min(...pesos);
   const rango = max - min || 1;
@@ -46,29 +46,29 @@ const MiniGrafico = ({ datos }) => {
 const RutinaCompacta = ({ rutina, expandida, onToggle }) => {
   const diasKeys = rutina ? Object.keys(rutina.dias || {}).map(Number).sort((a, b) => a - b) : [];
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+    <div className="bg-neutral-950 border border-neutral-900 rounded-2xl overflow-hidden">
       <div
         className="flex items-center justify-between p-4 cursor-pointer"
         onClick={onToggle}
       >
         <div>
           <p className="font-semibold text-white text-sm">{rutina.nombre}</p>
-          {rutina.descripcion && <p className="text-gray-500 text-xs mt-0.5">{rutina.descripcion}</p>}
+          {rutina.descripcion && <p className="text-neutral-500 text-xs mt-0.5">{rutina.descripcion}</p>}
         </div>
         {expandida
-          ? <ChevronUp size={15} className="text-gray-500 flex-shrink-0" />
-          : <ChevronDown size={15} className="text-gray-500 flex-shrink-0" />}
+          ? <ChevronUp size={15} className="text-neutral-500 flex-shrink-0" />
+          : <ChevronDown size={15} className="text-neutral-500 flex-shrink-0" />}
       </div>
       {expandida && (
-        <div className="border-t border-gray-800 px-4 py-3 space-y-4">
+        <div className="border-t border-neutral-900 px-4 py-3 space-y-4">
           {diasKeys.map(dia => (
             <div key={dia}>
-              <p className="text-orange-500 text-xs font-bold mb-2">Día {dia}</p>
+              <p className="text-blue-400 text-xs font-bold mb-2">Día {dia}</p>
               <div className="space-y-1">
                 {rutina.dias[dia].map((e, i) => (
                   <div key={i} className="flex items-center justify-between text-xs">
-                    <span className="text-gray-400">{e.nombre}</span>
-                    <span className="text-gray-600">
+                    <span className="text-neutral-400">{e.nombre}</span>
+                    <span className="text-neutral-600">
                       {e.series}×{e.repeticiones}{e.unidad_reps === 'seg' ? 'seg' : ''}{e.peso_kg ? ` · ${e.peso_kg}kg` : ''}
                     </span>
                   </div>
@@ -173,26 +173,26 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
   const diasKeys = rutina ? Object.keys(rutina.dias || {}).map(Number).sort((a, b) => a - b) : [];
 
   if (cargando) return (
-    <div className="min-h-screen bg-gray-950 pb-20">
+    <div className="min-h-screen bg-black pb-20">
       <NavbarCliente />
       <main className="max-w-2xl mx-auto px-4 pt-8 space-y-3">
-        {[1,2,3].map(i => <div key={i} className="h-20 bg-gray-900 rounded-2xl animate-pulse" />)}
+        {[1,2,3].map(i => <div key={i} className="h-20 bg-neutral-950 rounded-2xl animate-pulse" />)}
       </main>
     </div>
   );
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-24">
+    <div className="min-h-screen bg-black pb-24">
       <NavbarCliente />
       <main className="max-w-2xl mx-auto px-4 py-6">
 
         <h1 className="text-xl font-bold text-white mb-5">Mi Rutina</h1>
 
         {!rutina ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-16 px-6">
-            <Dumbbell className="text-gray-700 mx-auto mb-3" size={40} />
+          <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-16 px-6">
+            <Dumbbell className="text-neutral-700 mx-auto mb-3" size={40} />
             <h2 className="text-lg font-bold text-white mb-1">Sin rutina asignada</h2>
-            <p className="text-gray-500 text-sm">El entrenador todavía no te asignó una rutina.</p>
+            <p className="text-neutral-500 text-sm">El entrenador todavía no te asignó una rutina.</p>
           </div>
         ) : (
           <>
@@ -200,13 +200,13 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
             {!tieneClaseHoy ? (
               <div className="space-y-4">
                 {/* Banner informativo */}
-                <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center gap-3">
-                  <div className="w-9 h-9 rounded-xl bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                    <Calendar size={18} className="text-orange-500" />
+                <div className="bg-neutral-950 border border-neutral-900 rounded-2xl p-4 flex items-center gap-3">
+                  <div className="w-9 h-9 rounded-xl bg-blue-950/50 flex items-center justify-center flex-shrink-0">
+                    <Calendar size={18} className="text-blue-400" />
                   </div>
                   <div>
                     <p className="text-white text-sm font-semibold">Hoy no tenés clase</p>
-                    <p className="text-gray-500 text-xs">Reservá un turno para poder iniciar tu sesión de entrenamiento.</p>
+                    <p className="text-neutral-500 text-xs">Reservá un turno para poder iniciar tu sesión de entrenamiento.</p>
                   </div>
                 </div>
 
@@ -220,21 +220,21 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                 {/* Historial reciente compacto */}
                 {historial.length > 0 && (
                   <div>
-                    <p className="text-gray-500 text-xs font-semibold uppercase tracking-wider mb-2 px-1">Últimas sesiones</p>
-                    <div className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                    <p className="text-neutral-500 text-xs font-semibold uppercase tracking-wider mb-2 px-1">Últimas sesiones</p>
+                    <div className="bg-neutral-950 border border-neutral-900 rounded-2xl overflow-hidden">
                       {historial.slice(0, 3).map((s, i) => {
                         const p = s.total_ejercicios > 0 ? Math.round((parseInt(s.completados) / parseInt(s.total_ejercicios)) * 100) : 0;
                         return (
-                          <div key={s.id} className={`flex items-center gap-3 px-4 py-3 ${i < Math.min(historial.length, 3) - 1 ? 'border-b border-gray-800' : ''}`}>
+                          <div key={s.id} className={`flex items-center gap-3 px-4 py-3 ${i < Math.min(historial.length, 3) - 1 ? 'border-b border-neutral-900' : ''}`}>
                             <div className={`p-1.5 rounded-lg flex-shrink-0 ${s.completada ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
                               {s.completada ? <Award className="text-green-500" size={13} /> : <RotateCcw className="text-yellow-500" size={13} />}
                             </div>
                             <div className="flex-1">
                               <p className="text-white text-xs font-medium">Día {s.dia_rutina} · {formatFecha(s.fecha)}</p>
-                              <p className="text-gray-600 text-xs">{s.completados}/{s.total_ejercicios} ejercicios</p>
+                              <p className="text-neutral-600 text-xs">{s.completados}/{s.total_ejercicios} ejercicios</p>
                             </div>
-                            <div className="w-12 bg-gray-800 rounded-full h-1.5">
-                              <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: `${p}%` }} />
+                            <div className="w-12 bg-neutral-900 rounded-full h-1.5">
+                              <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${p}%` }} />
                             </div>
                           </div>
                         );
@@ -247,7 +247,7 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
               /* Si TIENE clase hoy: vista completa con tabs */
               <>
                 {/* Tabs */}
-                <div className="flex gap-1 mb-5 bg-gray-900 p-1 rounded-xl">
+                <div className="flex gap-1 mb-5 bg-neutral-950 p-1 rounded-xl">
                   {[
                     { key: 'rutina', label: 'Rutina', icon: Dumbbell },
                     { key: 'sesion', label: 'Hoy', icon: Play },
@@ -255,7 +255,7 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                     { key: 'rutinas-ant', label: 'Anteriores', icon: Award },
                   ].map(({ key, label, icon: Icon }) => (
                     <button key={key} onClick={() => setTab(key)}
-                      className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === key ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'}`}>
+                      className={`flex-1 flex items-center justify-center gap-1 py-2 rounded-lg text-xs font-medium transition-colors whitespace-nowrap ${tab === key ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'}`}>
                       <Icon size={12} /> {label}
                     </button>
                   ))}
@@ -264,16 +264,16 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                 {/* TAB: RUTINA */}
                 {tab === 'rutina' && (
                   <div>
-                    <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
+                    <div className="bg-neutral-950 border border-neutral-900 rounded-2xl p-4 mb-4">
                       <h2 className="font-bold text-white text-sm">{rutina.nombre}</h2>
-                      {rutina.descripcion && <p className="text-gray-500 text-xs mt-0.5">{rutina.descripcion}</p>}
+                      {rutina.descripcion && <p className="text-neutral-500 text-xs mt-0.5">{rutina.descripcion}</p>}
                     </div>
 
                     {/* Selector de días — Día 1, Día 2... */}
                     <div className="flex gap-1.5 mb-4 overflow-x-auto pb-1">
                       {diasKeys.map(d => (
                         <button key={d} onClick={() => setDiaVista(d)}
-                          className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${diaVista === d ? 'bg-orange-500 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'}`}>
+                          className={`flex-shrink-0 px-3 py-1.5 rounded-xl text-xs font-bold transition-colors ${diaVista === d ? 'bg-blue-600 text-white' : 'bg-neutral-950 border border-neutral-900 text-neutral-400 hover:text-white'}`}>
                           Día {d}
                         </button>
                       ))}
@@ -282,30 +282,30 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                     {/* Ejercicios del día */}
                     <div className="space-y-2 mb-5">
                       {rutina.dias?.[diaVista]?.map((ej, i) => (
-                        <div key={ej.id} className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-start gap-3">
-                          <div className="w-6 h-6 rounded-lg bg-orange-500/15 flex items-center justify-center flex-shrink-0 mt-0.5">
-                            <span className="text-orange-500 font-bold text-xs">{i + 1}</span>
+                        <div key={ej.id} className="bg-neutral-950 border border-neutral-900 rounded-2xl p-3 flex items-start gap-3">
+                          <div className="w-6 h-6 rounded-lg bg-blue-950/50 flex items-center justify-center flex-shrink-0 mt-0.5">
+                            <span className="text-blue-400 font-bold text-xs">{i + 1}</span>
                           </div>
                           <div className="flex-1 min-w-0">
                             <p className="text-white font-semibold text-sm leading-tight">{ej.nombre}</p>
-                            {ej.grupo_muscular && <p className="text-gray-600 text-xs mb-1">{ej.grupo_muscular}</p>}
+                            {ej.grupo_muscular && <p className="text-neutral-600 text-xs mb-1">{ej.grupo_muscular}</p>}
                             <div className="flex flex-wrap gap-1.5 mt-1.5">
-                              <span className="text-xs text-gray-300 bg-gray-800 px-2 py-0.5 rounded-lg">{ej.series} series × {ej.repeticiones} {ej.unidad_reps === 'seg' ? 'seg' : 'reps'}</span>
+                              <span className="text-xs text-neutral-300 bg-neutral-900 px-2 py-0.5 rounded-lg">{ej.series} series × {ej.repeticiones} {ej.unidad_reps === 'seg' ? 'seg' : 'reps'}</span>
                               {ej.peso_kg && (
-                                <span className={`text-xs px-2 py-0.5 rounded-lg flex items-center gap-1 ${ej.peso_fijo ? 'bg-orange-500/10 text-orange-400' : 'bg-blue-500/10 text-blue-400'}`}>
+                                <span className={`text-xs px-2 py-0.5 rounded-lg flex items-center gap-1 ${ej.peso_fijo ? 'bg-blue-950/50 text-blue-400' : 'bg-blue-500/10 text-blue-400'}`}>
                                   {ej.peso_fijo && <Lock size={9} />}{ej.peso_kg}kg
                                 </span>
                               )}
-                              {ej.descanso_seg && <span className="text-xs text-gray-500 bg-gray-800 px-2 py-0.5 rounded-lg">{ej.descanso_seg}s desc.</span>}
+                              {ej.descanso_seg && <span className="text-xs text-neutral-500 bg-neutral-900 px-2 py-0.5 rounded-lg">{ej.descanso_seg}s desc.</span>}
                             </div>
-                            {ej.notas && <p className="text-gray-500 text-xs mt-1.5 italic">{ej.notas}</p>}
+                            {ej.notas && <p className="text-neutral-500 text-xs mt-1.5 italic">{ej.notas}</p>}
                           </div>
                         </div>
                       ))}
                     </div>
 
                     <button onClick={iniciarSesion} disabled={iniciandoSesion}
-                      className="w-full py-3.5 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 bg-orange-500 hover:bg-orange-600 transition-colors active:scale-95 disabled:opacity-50">
+                      className="w-full py-3.5 rounded-xl font-bold text-white text-sm flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 transition-colors active:scale-95 disabled:opacity-50">
                       <Play size={16} /> {iniciandoSesion ? 'Iniciando...' : '💪 Iniciar sesión de hoy'}
                     </button>
                   </div>
@@ -315,23 +315,23 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                 {tab === 'sesion' && (
                   <div>
                     {!sesion ? (
-                      <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-12 px-6">
-                        <Play className="text-gray-700 mx-auto mb-3" size={36} />
-                        <p className="text-gray-400 text-sm mb-4">No iniciaste la sesión de hoy</p>
+                      <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-12 px-6">
+                        <Play className="text-neutral-700 mx-auto mb-3" size={36} />
+                        <p className="text-neutral-400 text-sm mb-4">No iniciaste la sesión de hoy</p>
                         <button onClick={iniciarSesion} disabled={iniciandoSesion}
-                          className="px-6 py-2.5 bg-orange-500 hover:bg-orange-600 text-white font-bold rounded-xl text-sm transition-colors">
+                          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white font-bold rounded-xl text-sm transition-colors">
                           {iniciandoSesion ? 'Iniciando...' : '💪 Iniciar'}
                         </button>
                       </div>
                     ) : (
                       <>
-                        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
+                        <div className="bg-neutral-950 border border-neutral-900 rounded-2xl p-4 mb-4">
                           <div className="flex items-center justify-between mb-2">
                             <span className="text-white font-bold text-sm">Día {sesion.dia_rutina}</span>
-                            <span className="text-orange-500 font-bold text-sm">{completados}/{total}</span>
+                            <span className="text-blue-400 font-bold text-sm">{completados}/{total}</span>
                           </div>
-                          <div className="w-full bg-gray-800 rounded-full h-2">
-                            <div className="bg-orange-500 h-2 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
+                          <div className="w-full bg-neutral-900 rounded-full h-2">
+                            <div className="bg-blue-600 h-2 rounded-full transition-all duration-500" style={{ width: `${pct}%` }} />
                           </div>
                           {pct === 100 && (
                             <div className="flex items-center gap-2 mt-3 text-green-400">
@@ -344,21 +344,21 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                           {sesion.ejercicios_estado?.map(se => {
                             const ej = rutina?.dias?.[sesion.dia_rutina]?.find(e => e.id === se.ejercicio_id);
                             return (
-                              <div key={se.id} className={`bg-gray-900 border rounded-2xl p-3 transition-all ${se.completado ? 'border-green-500/30 bg-green-500/5' : 'border-gray-800'}`}>
+                              <div key={se.id} className={`bg-neutral-950 border rounded-2xl p-3 transition-all ${se.completado ? 'border-green-500/30 bg-green-500/5' : 'border-neutral-900'}`}>
                                 <div className="flex items-start gap-3">
                                   <button onClick={() => toggleEjercicio(se)} className="mt-0.5 flex-shrink-0">
                                     {se.completado
                                       ? <CheckCircle className="text-green-500" size={20} />
-                                      : <Circle className="text-gray-600 hover:text-orange-400" size={20} />}
+                                      : <Circle className="text-neutral-600 hover:text-blue-400" size={20} />}
                                   </button>
                                   <div className="flex-1">
-                                    <p className={`font-semibold text-sm ${se.completado ? 'text-gray-500 line-through' : 'text-white'}`}>{se.nombre_ejercicio}</p>
-                                    <p className="text-gray-600 text-xs mt-0.5">{se.series_realizadas} × {se.repeticiones_realizadas} {ej?.unidad_reps === 'seg' ? 'seg' : 'reps'}</p>
+                                    <p className={`font-semibold text-sm ${se.completado ? 'text-neutral-500 line-through' : 'text-white'}`}>{se.nombre_ejercicio}</p>
+                                    <p className="text-neutral-600 text-xs mt-0.5">{se.series_realizadas} × {se.repeticiones_realizadas} {ej?.unidad_reps === 'seg' ? 'seg' : 'reps'}</p>
                                     {!se.completado && (
                                       ej?.peso_fijo && ej?.peso_kg ? (
-                                        <div className="flex items-center gap-1.5 mt-1.5 bg-orange-500/10 border border-orange-500/20 rounded-lg px-2.5 py-1 w-fit">
-                                          <Lock size={10} className="text-orange-400" />
-                                          <span className="text-orange-300 text-xs font-bold">{ej.peso_kg}kg fijo</span>
+                                        <div className="flex items-center gap-1.5 mt-1.5 bg-blue-950/50 border border-blue-600/20 rounded-lg px-2.5 py-1 w-fit">
+                                          <Lock size={10} className="text-blue-400" />
+                                          <span className="text-blue-300 text-xs font-bold">{ej.peso_kg}kg fijo</span>
                                         </div>
                                       ) : (
                                         <div className="flex items-center gap-1.5 mt-1.5">
@@ -366,7 +366,7 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                                             placeholder={ej?.peso_kg ? `Sug. ${ej.peso_kg}kg` : 'Peso kg'}
                                             value={pesosTemp[se.id] || ''}
                                             onChange={e => setPesosTemp(p => ({ ...p, [se.id]: e.target.value }))}
-                                            className="bg-gray-800 border border-gray-700 rounded-lg px-2.5 py-1 text-xs text-white w-28 outline-none focus:border-orange-500" min="0" step="0.5" />
+                                            className="bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-1 text-xs text-white w-28 outline-none focus:border-blue-600" min="0" step="0.5" />
                                         </div>
                                       )
                                     )}
@@ -387,49 +387,49 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                 {/* TAB: HISTORIAL */}
                 {tab === 'historial' && (
                   <div>
-                    <div className="flex gap-1 mb-4 bg-gray-900 p-1 rounded-xl">
-                      <button onClick={() => setModoHistorial('lista')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${modoHistorial === 'lista' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'}`}><List size={12} /> Sesiones</button>
-                      <button onClick={() => setModoHistorial('grafico')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${modoHistorial === 'grafico' ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'}`}><BarChart2 size={12} /> Progreso</button>
+                    <div className="flex gap-1 mb-4 bg-neutral-950 p-1 rounded-xl">
+                      <button onClick={() => setModoHistorial('lista')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${modoHistorial === 'lista' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'}`}><List size={12} /> Sesiones</button>
+                      <button onClick={() => setModoHistorial('grafico')} className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg text-xs font-medium transition-colors ${modoHistorial === 'grafico' ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'}`}><BarChart2 size={12} /> Progreso</button>
                     </div>
 
                     {modoHistorial === 'lista' ? (
                       historial.length === 0 ? (
-                        <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-12">
-                          <Calendar className="text-gray-700 mx-auto mb-3" size={36} />
-                          <p className="text-gray-500 text-sm">Todavía no tenés sesiones</p>
+                        <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-12">
+                          <Calendar className="text-neutral-700 mx-auto mb-3" size={36} />
+                          <p className="text-neutral-500 text-sm">Todavía no tenés sesiones</p>
                         </div>
                       ) : (
                         <div className="space-y-2">
                           {historial.map(s => {
                             const p = s.total_ejercicios > 0 ? Math.round((parseInt(s.completados) / parseInt(s.total_ejercicios)) * 100) : 0;
                             return (
-                              <div key={s.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                              <div key={s.id} className="bg-neutral-950 border border-neutral-900 rounded-2xl overflow-hidden">
                                 <div className="flex items-center gap-3 p-3 cursor-pointer" onClick={() => cargarDetalleSesion(s.id)}>
                                   <div className={`p-2 rounded-xl flex-shrink-0 ${s.completada ? 'bg-green-500/10' : 'bg-yellow-500/10'}`}>
                                     {s.completada ? <Award className="text-green-500" size={14} /> : <RotateCcw className="text-yellow-500" size={14} />}
                                   </div>
                                   <div className="flex-1">
                                     <p className="text-white text-sm font-semibold">{formatFecha(s.fecha)}</p>
-                                    <p className="text-gray-500 text-xs">Día {s.dia_rutina} · {s.completados}/{s.total_ejercicios}</p>
+                                    <p className="text-neutral-500 text-xs">Día {s.dia_rutina} · {s.completados}/{s.total_ejercicios}</p>
                                   </div>
                                   <div className="flex items-center gap-2">
-                                    <div className="w-12 bg-gray-800 rounded-full h-1.5">
-                                      <div className="bg-orange-500 h-1.5 rounded-full" style={{ width: `${p}%` }} />
+                                    <div className="w-12 bg-neutral-900 rounded-full h-1.5">
+                                      <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: `${p}%` }} />
                                     </div>
-                                    {verDetalle === s.id ? <ChevronUp size={14} className="text-gray-600" /> : <ChevronDown size={14} className="text-gray-600" />}
+                                    {verDetalle === s.id ? <ChevronUp size={14} className="text-neutral-600" /> : <ChevronDown size={14} className="text-neutral-600" />}
                                   </div>
                                 </div>
                                 {verDetalle === s.id && sesionDetalle && (
-                                  <div className="border-t border-gray-800 px-3 py-2.5 space-y-1.5">
+                                  <div className="border-t border-neutral-900 px-3 py-2.5 space-y-1.5">
                                     {sesionDetalle.ejercicios?.map((e, i) => (
                                       <div key={i} className="flex items-center justify-between text-xs">
                                         <div className="flex items-center gap-2">
-                                          {e.completado ? <CheckCircle className="text-green-500" size={11} /> : <Circle className="text-gray-700" size={11} />}
-                                          <span className={e.completado ? 'text-gray-300' : 'text-gray-600'}>{e.nombre_ejercicio}</span>
+                                          {e.completado ? <CheckCircle className="text-green-500" size={11} /> : <Circle className="text-neutral-700" size={11} />}
+                                          <span className={e.completado ? 'text-neutral-300' : 'text-neutral-600'}>{e.nombre_ejercicio}</span>
                                         </div>
                                         <div>
-                                          <span className="text-gray-500">{e.series_realizadas}×{e.repeticiones_realizadas}</span>
-                                          {e.peso_usado && <span className="text-orange-400 ml-2">{e.peso_usado}kg</span>}
+                                          <span className="text-neutral-500">{e.series_realizadas}×{e.repeticiones_realizadas}</span>
+                                          {e.peso_usado && <span className="text-blue-400 ml-2">{e.peso_usado}kg</span>}
                                         </div>
                                       </div>
                                     ))}
@@ -443,28 +443,28 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                     ) : (
                       <div>
                         {Object.keys(progreso).length === 0 ? (
-                          <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-12">
-                            <TrendingUp className="text-gray-700 mx-auto mb-3" size={36} />
-                            <p className="text-gray-500 text-sm">Completá sesiones con peso para ver tu progreso</p>
+                          <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-12">
+                            <TrendingUp className="text-neutral-700 mx-auto mb-3" size={36} />
+                            <p className="text-neutral-500 text-sm">Completá sesiones con peso para ver tu progreso</p>
                           </div>
                         ) : (
                           <div className="space-y-3">
                             <div className="grid grid-cols-2 gap-2">
                               {Object.keys(progreso).map(nombre => (
                                 <button key={nombre} onClick={() => setEjercicioGrafico(nombre)}
-                                  className={`text-left px-3 py-2.5 rounded-xl text-xs transition-colors border ${ejercicioGrafico === nombre ? 'bg-orange-500 border-orange-500 text-white' : 'bg-gray-900 border-gray-800 text-gray-400 hover:text-white'}`}>
+                                  className={`text-left px-3 py-2.5 rounded-xl text-xs transition-colors border ${ejercicioGrafico === nombre ? 'bg-blue-600 border-blue-600 text-white' : 'bg-neutral-950 border-neutral-900 text-neutral-400 hover:text-white'}`}>
                                   <p className="font-semibold">{nombre}</p>
                                   <p className="opacity-70 mt-0.5">{progreso[nombre].length} registros</p>
                                 </button>
                               ))}
                             </div>
                             {ejercicioGrafico && progreso[ejercicioGrafico] && (
-                              <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4">
+                              <div className="bg-neutral-950 border border-neutral-900 rounded-2xl p-4">
                                 <h3 className="font-bold text-white text-sm mb-3">{ejercicioGrafico}</h3>
                                 <div className="flex items-center gap-4 mb-4">
-                                  <div className="text-center"><p className="text-xs text-gray-500">Primer</p><p className="text-orange-400 font-bold text-sm">{progreso[ejercicioGrafico][0]?.peso}kg</p></div>
+                                  <div className="text-center"><p className="text-xs text-neutral-500">Primer</p><p className="text-blue-400 font-bold text-sm">{progreso[ejercicioGrafico][0]?.peso}kg</p></div>
                                   <TrendingUp className="text-green-500 flex-1" size={16} />
-                                  <div className="text-center"><p className="text-xs text-gray-500">Último</p><p className="text-green-400 font-bold text-sm">{progreso[ejercicioGrafico][progreso[ejercicioGrafico].length - 1]?.peso}kg</p></div>
+                                  <div className="text-center"><p className="text-xs text-neutral-500">Último</p><p className="text-green-400 font-bold text-sm">{progreso[ejercicioGrafico][progreso[ejercicioGrafico].length - 1]?.peso}kg</p></div>
                                 </div>
                                 <MiniGrafico datos={progreso[ejercicioGrafico]} />
                               </div>
@@ -480,14 +480,14 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                 {tab === 'rutinas-ant' && (
                   <div>
                     {historialRutinas.length === 0 ? (
-                      <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-12">
-                        <Award className="text-gray-700 mx-auto mb-3" size={36} />
-                        <p className="text-gray-500 text-sm">Todavía no tenés rutinas anteriores</p>
+                      <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-12">
+                        <Award className="text-neutral-700 mx-auto mb-3" size={36} />
+                        <p className="text-neutral-500 text-sm">Todavía no tenés rutinas anteriores</p>
                       </div>
                     ) : (
                       <div className="space-y-2">
                         {historialRutinas.map(r => (
-                          <div key={r.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                          <div key={r.id} className="bg-neutral-950 border border-neutral-900 rounded-2xl overflow-hidden">
                             <div className="flex items-center justify-between p-3 cursor-pointer" onClick={async () => {
                               if (rutinaArchivadaExp === r.id) { setRutinaArchivadaExp(null); return; }
                               if (!rutinaArchivadaData[r.id]) {
@@ -500,20 +500,20 @@ await api.post(`/gym/${gymSlug}/rutinas/sesion/${se.id}/ejercicio`, { completado
                             }}>
                               <div>
                                 <p className="font-semibold text-white text-sm">{r.nombre}</p>
-                                <p className="text-gray-500 text-xs">{formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}</p>
+                                <p className="text-neutral-500 text-xs">{formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}</p>
                               </div>
-                              {rutinaArchivadaExp === r.id ? <ChevronUp size={15} className="text-gray-600" /> : <ChevronDown size={15} className="text-gray-600" />}
+                              {rutinaArchivadaExp === r.id ? <ChevronUp size={15} className="text-neutral-600" /> : <ChevronDown size={15} className="text-neutral-600" />}
                             </div>
                             {rutinaArchivadaExp === r.id && rutinaArchivadaData[r.id] && (
-                              <div className="border-t border-gray-800 px-3 py-3 space-y-3">
+                              <div className="border-t border-neutral-900 px-3 py-3 space-y-3">
                                 {Object.entries(rutinaArchivadaData[r.id].dias || {}).map(([dia, ejs]) => (
                                   <div key={dia}>
-                                    <p className="text-orange-500 text-xs font-bold mb-1.5">Día {dia}</p>
+                                    <p className="text-blue-400 text-xs font-bold mb-1.5">Día {dia}</p>
                                     <div className="space-y-1">
                                       {ejs.map((e, i) => (
                                         <div key={i} className="flex items-center justify-between text-xs">
-                                          <span className="text-gray-400">{e.nombre}</span>
-                                          <span className="text-gray-600">{e.series}×{e.repeticiones}{e.peso_kg ? ` · ${e.peso_kg}kg` : ''}</span>
+                                          <span className="text-neutral-400">{e.nombre}</span>
+                                          <span className="text-neutral-600">{e.series}×{e.repeticiones}{e.peso_kg ? ` · ${e.peso_kg}kg` : ''}</span>
                                         </div>
                                       ))}
                                     </div>

@@ -18,16 +18,16 @@ export default function Notificaciones() {
   }, [gymSlug]);
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-20">
+    <div className="min-h-screen bg-black pb-20">
       <NavbarCliente />
       <main className="max-w-2xl mx-auto px-4 py-6">
         <h1 className="text-2xl font-bold text-white mb-6">Notificaciones</h1>
         {cargando ? (
-          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />)}</div>
+          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-16 bg-neutral-900 rounded-xl animate-pulse" />)}</div>
         ) : notificaciones.length === 0 ? (
           <div className="card text-center py-12">
-            <Bell className="text-gray-700 mx-auto mb-3" size={44} />
-            <p className="text-gray-500">No hay notificaciones</p>
+            <Bell className="text-neutral-700 mx-auto mb-3" size={44} />
+            <p className="text-neutral-500">No hay notificaciones</p>
           </div>
         ) : (
           <div className="space-y-3">
@@ -36,14 +36,14 @@ export default function Notificaciones() {
                 n.tipo === 'error' ? 'bg-red-900/20 border-red-500' :
                 n.tipo === 'pago' ? 'bg-green-900/20 border-green-500' :
                 n.tipo === 'advertencia' ? 'bg-yellow-900/20 border-yellow-500' :
-                'bg-gray-900 border-orange-500'
+                'bg-neutral-950 border-blue-600'
               }`}>
                 <div className="flex items-start justify-between gap-2">
                   <p className="font-semibold text-white text-sm">{n.titulo}</p>
-                  {!n.leida && <span className="w-2 h-2 bg-orange-500 rounded-full flex-shrink-0 mt-1" />}
+                  {!n.leida && <span className="w-2 h-2 bg-blue-600 rounded-full flex-shrink-0 mt-1" />}
                 </div>
-                <p className="text-gray-400 text-sm mt-1">{n.mensaje}</p>
-                <p className="text-gray-600 text-xs mt-2">
+                <p className="text-neutral-400 text-sm mt-1">{n.mensaje}</p>
+                <p className="text-neutral-600 text-xs mt-2">
                   {format(new Date(n.creado_en), "d 'de' MMMM 'a las' HH:mm", { locale: es })}
                 </p>
               </div>

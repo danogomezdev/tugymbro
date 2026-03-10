@@ -10,11 +10,26 @@ const planLabels = {
   '4_dias': '4 días/semana', '5_dias': '5 días/semana', 'libre': 'Acceso libre'
 };
 
+// Detecta si un color hex es muy claro (luminosidad > 0.7)
+function esColorClaro(hex) {
+  if (!hex) return false;
+  const h = hex.replace('#', '');
+  const r = parseInt(h.substring(0,2), 16) / 255;
+  const g = parseInt(h.substring(2,4), 16) / 255;
+  const b = parseInt(h.substring(4,6), 16) / 255;
+  const luminancia = 0.299 * r + 0.587 * g + 0.114 * b;
+  return luminancia > 0.7;
+}
+
 export default function ClientePerfil() {
   const { gymSlug } = useParams();
   const { usuario, gimnasio, logout } = useAuth();
   const navigate = useNavigate();
-  const color = gimnasio?.color_primario || '#f97316';
+
+  const colorRaw = gimnasio?.color_primario || '#3b82f6';
+  // Si el color es muy claro (ej: blanco), usamos azul por defecto
+  const color = esColorClaro(colorRaw) ? '#3b82f6' : colorRaw;
+  const textColor = 'text-white';
 
   const [tab, setTab] = useState('perfil');
   const [formPerfil, setFormPerfil] = useState({
@@ -53,18 +68,18 @@ export default function ClientePerfil() {
   };
 
   const vencimiento = usuario?.fecha_vencimiento_pago
-  ? new Date(usuario.fecha_vencimiento_pago) : null;
+    ? new Date(usuario.fecha_vencimiento_pago) : null;
   const vencida = vencimiento && vencimiento < new Date();
   const tienePlan = usuario?.plan && usuario.plan !== '';
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-8">
+    <div className="min-h-screen bg-black pb-8">
 
-      <header className="bg-gray-900/95 backdrop-blur border-b border-gray-800 px-4 py-3 sticky top-0 z-40">
+      <header className="bg-black/95 backdrop-blur border-b border-neutral-900 px-4 py-3 sticky top-0 z-40">
         <div className="max-w-2xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
             <button onClick={() => navigate(`/gym/${gymSlug}/home`)}
-              className="text-gray-400 hover:text-white transition-colors">
+              className="text-neutral-500 hover:text-white transition-colors">
               <ArrowLeft size={20} />
             </button>
             <span className="font-bold text-white">Mi perfil</span>
@@ -86,25 +101,25 @@ export default function ClientePerfil() {
           </div>
           <div>
             <h2 className="text-xl font-bold text-white">{usuario?.nombre} {usuario?.apellido}</h2>
-            <p className="text-gray-500 text-sm">{usuario?.email}</p>
+            <p className="text-neutral-500 text-sm">{usuario?.email}</p>
           </div>
         </div>
 
         {/* Info plan */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-6">
+        <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 mb-6">
           <div className="grid grid-cols-2 gap-3 mb-3">
             <div>
-              <p className="text-gray-500 text-xs mb-0.5">Plan actual</p>
+              <p className="text-neutral-500 text-xs mb-0.5">Plan actual</p>
               <p className="text-white font-bold text-sm">{planLabels[usuario?.plan] || 'Sin plan'}</p>
             </div>
             <div>
-              <p className="text-gray-500 text-xs mb-0.5">Vencimiento</p>
+              <p className="text-neutral-500 text-xs mb-0.5">Vencimiento</p>
               {vencimiento ? (
                 <p className={`font-bold text-sm ${vencida ? 'text-red-400' : 'text-green-400'}`}>
                   {vencimiento.toLocaleDateString('es-AR')}{vencida && ' · Vencida'}
                 </p>
               ) : (
-                <p className="text-gray-600 text-sm">Sin fecha</p>
+                <p className="text-neutral-600 text-sm">Sin fecha</p>
               )}
             </div>
           </div>
@@ -117,14 +132,15 @@ export default function ClientePerfil() {
         </div>
 
         {/* Tabs */}
-        <div className="flex bg-gray-900 border border-gray-800 rounded-xl p-1 mb-5">
+        <div className="flex bg-neutral-950 border border-neutral-800 rounded-xl p-1 mb-5">
           {[
             { key: 'perfil', label: 'Mis datos', icon: User },
             { key: 'password', label: 'Contraseña', icon: Lock },
           ].map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setTab(key)}
-              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${tab === key ? 'text-white' : 'text-gray-500'}`}
-              style={tab === key ? { backgroundColor: color + '25', color } : {}}>
+              className={`flex-1 flex items-center justify-center gap-2 py-2 rounded-lg text-sm font-medium transition-all ${
+                tab === key ? 'bg-neutral-800 text-white' : 'text-neutral-500 hover:text-neutral-300'
+              }`}>
               <Icon size={14} /> {label}
             </button>
           ))}
@@ -132,35 +148,35 @@ export default function ClientePerfil() {
 
         {/* PERFIL */}
         {tab === 'perfil' && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4">
             <h3 className="font-bold text-white">Mis datos</h3>
             <div className="grid grid-cols-2 gap-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5">Nombre *</label>
+                <label className="block text-xs text-neutral-400 mb-1.5">Nombre *</label>
                 <input value={formPerfil.nombre}
                   onChange={e => setFormPerfil(f => ({ ...f, nombre: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                  className="input-field w-full"
                   placeholder="Tu nombre" />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1.5">Apellido</label>
+                <label className="block text-xs text-neutral-400 mb-1.5">Apellido</label>
                 <input value={formPerfil.apellido}
                   onChange={e => setFormPerfil(f => ({ ...f, apellido: e.target.value }))}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                  className="input-field w-full"
                   placeholder="Tu apellido" />
               </div>
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Email</label>
+              <label className="block text-xs text-neutral-400 mb-1.5">Email</label>
               <input value={usuario?.email} disabled
-                className="w-full bg-gray-800/50 border border-gray-700/50 rounded-xl px-4 py-3 text-gray-500 text-sm cursor-not-allowed" />
-              <p className="text-gray-600 text-xs mt-1">El email no se puede modificar</p>
+                className="w-full bg-neutral-900/50 border border-neutral-800 rounded-xl px-4 py-3 text-neutral-600 text-sm cursor-not-allowed" />
+              <p className="text-neutral-700 text-xs mt-1">El email no se puede modificar</p>
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Teléfono</label>
+              <label className="block text-xs text-neutral-400 mb-1.5">Teléfono</label>
               <input value={formPerfil.telefono}
                 onChange={e => setFormPerfil(f => ({ ...f, telefono: e.target.value }))}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                className="input-field w-full"
                 placeholder="+54 9 11 1234-5678" />
             </div>
             <button onClick={guardarPerfil} disabled={guardandoPerfil}
@@ -173,7 +189,7 @@ export default function ClientePerfil() {
 
         {/* CONTRASEÑA */}
         {tab === 'password' && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6 space-y-4">
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-6 space-y-4">
             <h3 className="font-bold text-white">Cambiar contraseña</h3>
             {[
               { key: 'actual', label: 'Contraseña actual', placeholder: '••••••••' },
@@ -181,14 +197,14 @@ export default function ClientePerfil() {
               { key: 'confirmar', label: 'Confirmar nueva contraseña', placeholder: '••••••••' },
             ].map(({ key, label, placeholder }) => (
               <div key={key}>
-                <label className="block text-xs text-gray-400 mb-1.5">{label}</label>
+                <label className="block text-xs text-neutral-400 mb-1.5">{label}</label>
                 <div className="relative">
                   <input type={verPass[key] ? 'text' : 'password'} value={formPass[key]}
                     onChange={e => setFormPass(f => ({ ...f, [key]: e.target.value }))}
-                    className="w-full bg-gray-800 border border-gray-700 rounded-xl px-4 py-3 pr-11 text-white text-sm focus:outline-none focus:border-orange-500 transition-colors"
+                    className="input-field w-full pr-11"
                     placeholder={placeholder} />
                   <button type="button" onClick={() => setVerPass(v => ({ ...v, [key]: !v[key] }))}
-                    className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-white">
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-600 hover:text-white transition-colors">
                     {verPass[key] ? <EyeOff size={15} /> : <Eye size={15} />}
                   </button>
                 </div>
@@ -212,7 +228,7 @@ export default function ClientePerfil() {
         {/* Cerrar sesión */}
         <div className="mt-4">
           <button onClick={logout}
-            className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-red-400 border border-red-500/30 bg-red-500/5 hover:bg-red-500/10 transition-all">
+            className="w-full py-3 rounded-xl font-bold flex items-center justify-center gap-2 text-red-400 border border-red-900 bg-red-950/20 hover:bg-red-950/40 transition-all">
             <LogOut size={15} /> Cerrar sesión
           </button>
         </div>

@@ -67,16 +67,19 @@ const crearReserva = async (req, res) => {
         return res.status(400).json({ error: `Ya tenés ${limite} clases reservadas para esa semana.` });
     }
 
-    // Verificar capacidad
-    if (!cfg.sin_limite_personas && horario_id) {
-      const ocupacion = await pool.query(
-        `SELECT COUNT(*) FROM reservas WHERE horario_id=$1 AND fecha=$2 AND estado!='cancelada'`,
-        [horario_id, fecha]
-      );
-      const horario = await pool.query('SELECT capacidad_maxima FROM horarios WHERE id=$1 AND gimnasio_id=$2', [horario_id, gimnasioId]);
-      if (!horario.rows[0]) return res.status(404).json({ error: 'Horario no encontrado' });
-      if (parseInt(ocupacion.rows[0].count) >= horario.rows[0].capacidad_maxima)
-        return res.status(400).json({ error: 'El turno ya está completo.' });
+    // En modo libre no hace falta verificar horario ni capacidad
+    if (cfg.modo_acceso !== 'libre') {
+      if (!horario_id) return res.status(400).json({ error: 'Falta el horario.' });
+      if (!cfg.sin_limite_personas) {
+        const ocupacion = await pool.query(
+          `SELECT COUNT(*) FROM reservas WHERE horario_id=$1 AND fecha=$2 AND estado!='cancelada'`,
+          [horario_id, fecha]
+        );
+        const horario = await pool.query('SELECT capacidad_maxima FROM horarios WHERE id=$1 AND gimnasio_id=$2', [horario_id, gimnasioId]);
+        if (!horario.rows[0]) return res.status(404).json({ error: 'Horario no encontrado' });
+        if (parseInt(ocupacion.rows[0].count) >= horario.rows[0].capacidad_maxima)
+          return res.status(400).json({ error: 'El turno ya está completo.' });
+      }
     }
 
     // Verificar que no tenga reserva ese día
@@ -136,7 +139,19 @@ const disponibilidad = async (req, res) => {
     }
 
     if (cfg.modo_acceso === 'libre') {
-      return res.json({ horarios:[], fecha, diaSemana, modo_libre:true, abierto:true });
+      // Buscar horario de apertura/cierre desde config o desde horarios del día
+      const horaApertura = cfg.hora_apertura || null;
+      const horaCierre = cfg.hora_cierre || null;
+      // Contar cuántos van hoy (para mostrar en la app)
+      const asistentesHoy = await pool.query(
+        `SELECT COUNT(*) FROM reservas WHERE gimnasio_id=$1 AND fecha=$2 AND estado!='cancelada'`,
+        [gimnasioId, fecha]
+      );
+      return res.json({
+        horarios: [], fecha, diaSemana, modo_libre: true, abierto: true,
+        hora_apertura: horaApertura, hora_cierre: horaCierre,
+        asistentes_hoy: parseInt(asistentesHoy.rows[0].count)
+      });
     }
 
     const result = await pool.query(

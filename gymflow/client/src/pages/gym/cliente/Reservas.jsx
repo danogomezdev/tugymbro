@@ -2,11 +2,22 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { format, addDays, startOfWeek, isSameDay, isToday, isPast } from 'date-fns';
 import { es } from 'date-fns/locale';
-import { ChevronLeft, ChevronRight, Clock, Users, Check, AlertTriangle, Lock, CreditCard } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Clock, Users, Check, AlertTriangle, Lock, CreditCard, Dumbbell } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 import NavbarCliente from './NavbarCliente';
 import api from '../../../services/api';
 import toast from 'react-hot-toast';
+
+function esColorClaro(hex) {
+  if (!hex) return false;
+  const h = hex.replace('#', '');
+  if (h.length < 6) return false;
+  const r = parseInt(h.substring(0,2), 16) / 255;
+  const g = parseInt(h.substring(2,4), 16) / 255;
+  const b = parseInt(h.substring(4,6), 16) / 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 0.7;
+}
+
 
 export default function Reservas() {
   const { gymSlug } = useParams();
@@ -17,6 +28,9 @@ export default function Reservas() {
   const [horarios, setHorarios] = useState([]);
   const [modoLibre, setModoLibre] = useState(false);
   const [cerrado, setCerrado] = useState(false);
+  const [horaApertura, setHoraApertura] = useState(null);
+  const [horaCierre, setHoraCierre] = useState(null);
+  const [asistentesHoy, setAsistentesHoy] = useState(0);
   const [misReservasSemana, setMisReservasSemana] = useState([]);
   const [cargando, setCargando] = useState(false);
   const [reservando, setReservando] = useState(null);
@@ -50,6 +64,9 @@ export default function Reservas() {
       setHorarios(data.horarios || []);
       setModoLibre(data.modo_libre || false);
       setCerrado(data.cerrado || false);
+      setHoraApertura(data.hora_apertura || null);
+      setHoraCierre(data.hora_cierre || null);
+      setAsistentesHoy(data.asistentes_hoy || 0);
     } catch { toast.error('Error al cargar horarios'); }
     finally { setCargando(false); }
   };
@@ -97,30 +114,31 @@ export default function Reservas() {
     finally { setReservando(null); }
   };
 
-  const color = gimnasio?.color_primario || '#f97316';
+  const colorRaw = gimnasio?.color_primario || '#3b82f6';
+  const color = esColorClaro(colorRaw) ? '#3b82f6' : colorRaw;
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-20">
+    <div className="min-h-screen bg-black pb-20">
       <NavbarCliente />
       <main className="max-w-2xl mx-auto px-4 py-6">
         <div className="mb-4">
           <h1 className="text-2xl font-bold text-white">Reservar turno</h1>
           {planActivo && limite < 999 && (
-            <p className="text-gray-500 text-sm mt-0.5">
-              Esta semana: <span className={reservasEstaSemana.length >= limite ? 'text-red-400' : 'text-orange-500'}>{reservasEstaSemana.length}/{limite}</span>
+            <p className="text-neutral-500 text-sm mt-0.5">
+              Esta semana: <span className={reservasEstaSemana.length >= limite ? 'text-red-400' : 'text-blue-400'}>{reservasEstaSemana.length}/{limite}</span>
             </p>
           )}
         </div>
 
         {/* Sin plan activo — bloqueo total */}
         {!planActivo && (
-          <div className="bg-gray-900 border border-yellow-500/30 rounded-2xl p-6 mb-4 text-center">
+          <div className="bg-neutral-950 border border-yellow-500/30 rounded-2xl p-6 mb-4 text-center">
             <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-3"
               style={{ backgroundColor: '#eab30820' }}>
               <CreditCard className="text-yellow-500" size={22} />
             </div>
             <p className="font-bold text-white mb-1">Necesitás un plan activo</p>
-            <p className="text-gray-400 text-sm mb-4">Para reservar turnos primero tenés que contratar un plan y que el gimnasio lo apruebe.</p>
+            <p className="text-neutral-400 text-sm mb-4">Para reservar turnos primero tenés que contratar un plan y que el gimnasio lo apruebe.</p>
             <button onClick={() => navigate(`/gym/${gymSlug}/pagar`)}
               className="px-6 py-2.5 rounded-xl font-bold text-white text-sm hover:opacity-90 transition-all"
               style={{ backgroundColor: color }}>
@@ -138,13 +156,13 @@ export default function Reservas() {
         )}
 
         {/* Calendario — siempre visible pero botones deshabilitados sin plan */}
-        <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
+        <div className="bg-neutral-950 border border-neutral-900 rounded-2xl p-4 mb-4">
           <div className="flex items-center justify-between mb-3">
-            <button onClick={() => setSemanaOffset(o => o - 1)} className="text-gray-400 hover:text-white p-1"><ChevronLeft size={18} /></button>
+            <button onClick={() => setSemanaOffset(o => o - 1)} className="text-neutral-400 hover:text-white p-1"><ChevronLeft size={18} /></button>
             <span className="text-sm font-medium text-white capitalize">
               {format(inicioSemana, "d 'de' MMMM", { locale: es })} — {format(addDays(inicioSemana, 6), "d 'de' MMMM", { locale: es })}
             </span>
-            <button onClick={() => setSemanaOffset(o => o + 1)} className="text-gray-400 hover:text-white p-1"><ChevronRight size={18} /></button>
+            <button onClick={() => setSemanaOffset(o => o + 1)} className="text-neutral-400 hover:text-white p-1"><ChevronRight size={18} /></button>
           </div>
           <div className="grid grid-cols-7 gap-1">
             {diasSemana.map(dia => {
@@ -157,14 +175,14 @@ export default function Reservas() {
                   disabled={pasado}
                   className={`flex flex-col items-center py-2 px-0.5 rounded-xl transition-all text-center ${
                     seleccionado ? 'text-white' :
-                    pasado || !abierto ? 'opacity-30 cursor-not-allowed text-gray-600' :
-                    'bg-gray-800 hover:bg-gray-700 text-gray-300'
+                    pasado || !abierto ? 'opacity-30 cursor-not-allowed text-neutral-600' :
+                    'bg-neutral-900 hover:bg-neutral-800 text-neutral-300'
                   }`}
                   style={seleccionado ? { backgroundColor: color } : {}}>
                   <span className="text-xs font-medium capitalize">{format(dia, 'EEE', { locale: es })}</span>
                   <span className="text-sm font-bold mt-0.5">{format(dia, 'd')}</span>
-                  {tieneReserva && <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${seleccionado ? 'bg-white' : 'bg-orange-500'}`} />}
-                  {!abierto && !pasado && <Lock size={9} className="mt-0.5 text-gray-600" />}
+                  {tieneReserva && <div className={`w-1.5 h-1.5 rounded-full mt-0.5 ${seleccionado ? 'bg-white' : 'bg-blue-600'}`} />}
+                  {!abierto && !pasado && <Lock size={9} className="mt-0.5 text-neutral-600" />}
                 </button>
               );
             })}
@@ -176,45 +194,88 @@ export default function Reservas() {
         </h2>
 
         {cargando ? (
-          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-gray-800 rounded-xl animate-pulse" />)}</div>
+          <div className="space-y-3">{[1,2,3].map(i => <div key={i} className="h-20 bg-neutral-900 rounded-xl animate-pulse" />)}</div>
         ) : cerrado ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-10">
-            <Lock className="text-gray-700 mx-auto mb-2" size={36} />
-            <p className="text-gray-500 text-sm font-medium">El gimnasio está cerrado este día</p>
+          <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-10">
+            <Lock className="text-neutral-700 mx-auto mb-2" size={36} />
+            <p className="text-neutral-500 text-sm font-medium">El gimnasio está cerrado este día</p>
           </div>
         ) : modoLibre ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-6">
-            <div className="text-center mb-5">
-              <div className="w-12 h-12 rounded-2xl mx-auto flex items-center justify-center mb-3" style={{ backgroundColor: color + '20' }}>
-                <Clock style={{ color }} size={22} />
+          <div className="space-y-3">
+            {/* Card horario del gym */}
+            <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-5">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: color + '20' }}>
+                  <Clock style={{ color }} size={18} />
+                </div>
+                <div>
+                  <p className="font-bold text-white text-sm">Acceso libre</p>
+                  <p className="text-neutral-500 text-xs">Podés ir cuando quieras dentro del horario</p>
+                </div>
               </div>
-              <h3 className="font-bold text-white mb-1">Acceso libre</h3>
-              <p className="text-gray-400 text-sm">Este gimnasio no tiene horarios fijos, podés reservar cualquier momento del día.</p>
+              {(horaApertura || horaCierre) && (
+                <div className="flex items-center gap-2 bg-neutral-900 rounded-xl px-4 py-3 mb-4">
+                  <Clock size={14} className="text-neutral-500" />
+                  <span className="text-neutral-400 text-sm">Horario: </span>
+                  <span className="text-white font-bold text-sm">
+                    {horaApertura || '?'} — {horaCierre || '?'}
+                  </span>
+                </div>
+              )}
+              {/* Estado: ya confirmado o botón para anotarse */}
+              {tengoReservaEseDia(diaSeleccionado) ? (
+                <div className="bg-green-500/10 border border-green-500/30 rounded-xl p-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 bg-green-500/20 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Check className="text-green-400" size={18} />
+                    </div>
+                    <div>
+                      <p className="font-bold text-green-400 text-sm">¡Anotado para hoy!</p>
+                      <p className="text-green-500/70 text-xs">Ya confirmaste que vas. El profe te va a tener la rutina lista.</p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <button onClick={() => reservar(null)}
+                  disabled={!planActivo || usuario?.bloqueado || reservando !== null}
+                  className="w-full py-3.5 rounded-xl font-bold text-white text-sm disabled:opacity-40 transition-all hover:opacity-90 flex items-center justify-center gap-2"
+                  style={{ backgroundColor: color }}>
+                  {reservando ? (
+                    <><span className="animate-spin border-2 border-white/30 border-t-white rounded-full w-4 h-4" /> Confirmando...</>
+                  ) : (
+                    <><Check size={16} /> Confirmar que voy hoy</>
+                  )}
+                </button>
+              )}
             </div>
-            {tengoReservaEseDia(diaSeleccionado) ? (
-              <div className="flex items-center justify-center gap-2 text-green-400 bg-green-500/10 border border-green-500/30 rounded-xl py-3">
-                <Check size={18} /> <span className="font-semibold text-sm">Ya reservaste este día</span>
+
+            {/* Card info asistentes + rutina */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center">
+                <Users className="text-neutral-500 mb-2" size={20} />
+                <p className="text-2xl font-black text-white">{asistentesHoy}</p>
+                <p className="text-neutral-500 text-xs mt-0.5">confirmados hoy</p>
               </div>
-            ) : (
-              <button onClick={() => reservar(null)}
-                disabled={!planActivo || usuario?.bloqueado || reservando !== null}
-                className="w-full py-3 rounded-xl font-bold text-white text-sm disabled:opacity-40 transition-all hover:opacity-90"
-                style={{ backgroundColor: color }}>
-                {reservando ? 'Reservando...' : 'Reservar este día'}
+              <button
+                onClick={() => navigate(`/gym/${gymSlug}/rutina`)}
+                className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 flex flex-col items-center justify-center text-center hover:border-neutral-700 transition-colors">
+                <Dumbbell className="text-neutral-500 mb-2" size={20} />
+                <p className="text-white text-sm font-bold">Mi rutina</p>
+                <p className="text-neutral-500 text-xs mt-0.5">Ver ejercicios de hoy</p>
               </button>
-            )}
+            </div>
           </div>
         ) : horarios.length === 0 ? (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-10">
-            <Clock className="text-gray-700 mx-auto mb-2" size={36} />
-            <p className="text-gray-500 text-sm">No hay horarios disponibles para este día</p>
+          <div className="bg-neutral-950 border border-neutral-900 rounded-2xl text-center py-10">
+            <Clock className="text-neutral-700 mx-auto mb-2" size={36} />
+            <p className="text-neutral-500 text-sm">No hay horarios disponibles para este día</p>
           </div>
         ) : (
           <div className="space-y-3">
             {horarios.map(h => {
               const yaReserve = tengoReservaEseDia(diaSeleccionado);
               return (
-                <div key={h.id} className={`bg-gray-900 border border-gray-800 rounded-2xl p-4 flex items-center justify-between ${h.lleno ? 'opacity-50' : ''}`}>
+                <div key={h.id} className={`bg-neutral-950 border border-neutral-900 rounded-2xl p-4 flex items-center justify-between ${h.lleno ? 'opacity-50' : ''}`}>
                   <div className="flex items-center gap-3">
                     <div className="p-2.5 rounded-xl" style={{ backgroundColor: color + '15' }}>
                       <Clock style={{ color }} size={18} />
@@ -223,8 +284,8 @@ export default function Reservas() {
                       <p className="font-bold text-white">{h.hora_inicio?.slice(0,5)} - {h.hora_fin?.slice(0,5)}</p>
                       {h.disponibles < 999 && (
                         <div className="flex items-center gap-1 mt-0.5">
-                          <Users size={12} className="text-gray-500" />
-                          <p className="text-gray-400 text-xs">{h.disponibles} lugares de {h.capacidad_maxima}</p>
+                          <Users size={12} className="text-neutral-500" />
+                          <p className="text-neutral-400 text-xs">{h.disponibles} lugares de {h.capacidad_maxima}</p>
                         </div>
                       )}
                     </div>

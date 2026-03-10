@@ -2,6 +2,16 @@ import { useNavigate, useParams, useLocation } from 'react-router-dom';
 import { Home, Calendar, Dumbbell, RefreshCw, Bell, User } from 'lucide-react';
 import { useAuth } from '../../../context/AuthContext';
 
+function esColorClaro(hex) {
+  if (!hex) return false;
+  const h = hex.replace('#', '');
+  if (h.length < 6) return false;
+  const r = parseInt(h.substring(0,2), 16) / 255;
+  const g = parseInt(h.substring(2,4), 16) / 255;
+  const b = parseInt(h.substring(4,6), 16) / 255;
+  return (0.299 * r + 0.587 * g + 0.114 * b) > 0.7;
+}
+
 export default function NavbarCliente({ notifCount = 0 }) {
   const { gymSlug } = useParams();
   const { gimnasio, usuario, logout } = useAuth();
@@ -9,7 +19,8 @@ export default function NavbarCliente({ notifCount = 0 }) {
   const location = useLocation();
 
   const base = `/gym/${gymSlug}`;
-  const color = gimnasio?.color_primario || '#3b82f6';
+  const colorRaw = gimnasio?.color_primario || '#3b82f6';
+  const color = esColorClaro(colorRaw) ? '#3b82f6' : colorRaw;
 
   const items = [
     { path: `${base}/home`, icon: Home, label: 'Inicio' },

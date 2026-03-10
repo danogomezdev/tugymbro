@@ -29,6 +29,7 @@ export default function GymConfiguracion() {
     sin_limite_personas: false, planes_activos: ['2_dias', '3_dias'],
     plan_libre: false, abierto_24h: false,
     dias_abierto: ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
+    hora_apertura: '', hora_cierre: '',
   });
 
   const [capacidadGlobal, setCapacidadGlobal] = useState(20);
@@ -77,6 +78,7 @@ export default function GymConfiguracion() {
         sin_limite_personas: c.sin_limite_personas || false, planes_activos: c.planes_activos || ['2_dias', '3_dias'],
         plan_libre: c.plan_libre || false, abierto_24h: c.abierto_24h || false,
         dias_abierto: c.dias_abierto || ['lunes', 'martes', 'miercoles', 'jueves', 'viernes'],
+        hora_apertura: c.hora_apertura || '', hora_cierre: c.hora_cierre || '',
       });
       const h = r.data.horarios || [];
       setGrid(buildGrid(h));
@@ -296,6 +298,38 @@ export default function GymConfiguracion() {
                       {dia}
                     </button>
                   ))}
+                </div>
+              </div>
+            )}
+            {/* Horario apertura/cierre — visible en modo libre o mixto */}
+            {(form.modo_acceso === 'libre' || form.modo_acceso === 'mixto') && (
+              <div>
+                <p className="text-sm text-gray-400 mb-2 font-medium">Horario de atención</p>
+                <p className="text-gray-600 text-xs mb-3">Esto se muestra a los clientes en la app para que sepan cuándo pueden ir.</p>
+                <div className="flex items-center gap-3">
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Apertura</label>
+                    <select value={form.hora_apertura}
+                      onChange={e => setForm(f => ({ ...f, hora_apertura: e.target.value }))}
+                      className="input-field w-28">
+                      <option value="">--</option>
+                      {Array.from({ length: 18 }, (_, i) => `${String(i + 5).padStart(2,'0')}:00`).map(h => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
+                  <span className="text-gray-600 mt-5">—</span>
+                  <div>
+                    <label className="block text-xs text-gray-500 mb-1">Cierre</label>
+                    <select value={form.hora_cierre}
+                      onChange={e => setForm(f => ({ ...f, hora_cierre: e.target.value }))}
+                      className="input-field w-28">
+                      <option value="">--</option>
+                      {Array.from({ length: 18 }, (_, i) => `${String(i + 5).padStart(2,'0')}:00`).map(h => (
+                        <option key={h} value={h}>{h}</option>
+                      ))}
+                    </select>
+                  </div>
                 </div>
               </div>
             )}

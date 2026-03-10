@@ -254,7 +254,8 @@ const actualizarConfiguracion = async (req, res) => {
     color_primario, descripcion, instagram, whatsapp,
     modo_acceso, capacidad_default, sin_limite_personas,
     planes_activos, plan_libre, alias_transferencia,
-    nombre_titular, banco, abierto_24h, dias_abierto
+    nombre_titular, banco, abierto_24h, dias_abierto,
+    hora_apertura, hora_cierre
   } = req.body;
   const gId = gymId(req);
   const toNum = (v) => (v === '' || v === null || v === undefined) ? null : parseFloat(v);
@@ -267,13 +268,14 @@ const actualizarConfiguracion = async (req, res) => {
         gimnasio_id, precio_1dia, precio_2dias, precio_3dias, precio_libre, texto_bienvenida,
         modo_acceso, capacidad_default, sin_limite_personas, planes_activos,
         plan_libre, alias_transferencia, nombre_titular, banco, abierto_24h, dias_abierto,
-        descripcion, instagram, whatsapp
-       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
+        descripcion, instagram, whatsapp, hora_apertura, hora_cierre
+       ) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
        ON CONFLICT (gimnasio_id) DO UPDATE SET
          precio_1dia=$2, precio_2dias=$3, precio_3dias=$4, precio_libre=$5, texto_bienvenida=$6,
          modo_acceso=$7, capacidad_default=$8, sin_limite_personas=$9, planes_activos=$10,
          plan_libre=$11, alias_transferencia=$12, nombre_titular=$13, banco=$14,
          abierto_24h=$15, dias_abierto=$16, descripcion=$17, instagram=$18, whatsapp=$19,
+         hora_apertura=$20, hora_cierre=$21,
          actualizado_en=NOW()`,
       [
         gId,
@@ -287,7 +289,8 @@ const actualizarConfiguracion = async (req, res) => {
         alias_transferencia || null, nombre_titular || null, banco || null,
         abierto_24h || false,
         dias_abierto || ['lunes','martes','miercoles','jueves','viernes','sabado','domingo'],
-        descripcion || null, instagram || null, whatsapp || null
+        descripcion || null, instagram || null, whatsapp || null,
+        hora_apertura || null, hora_cierre || null
       ]
     );
     if (color_primario) {
