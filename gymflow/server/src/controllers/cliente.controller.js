@@ -106,9 +106,19 @@ const cancelarReserva = async (req, res) => {
   try {
     const reserva = await pool.query('SELECT * FROM reservas WHERE id=$1 AND usuario_id=$2', [id, usuarioId]);
     if (reserva.rows.length === 0) return res.status(404).json({ error: 'Reserva no encontrada' });
-    const fechaReserva = new Date(reserva.rows[0].fecha);
+    // Parsear fecha como mediodía para evitar problemas de timezone (UTC-3 Argentina)
+    const fechaStr = String(reserva.rows[0].fecha).slice(0, 10);
+    const fechaReserva = new Date(fechaStr + 'T12:00:00');
     const horasRestantes = (fechaReserva - new Date()) / (1000 * 60 * 60);
-    if (horasRestantes < 2) return res.status(400).json({ error: 'No podés cancelar con menos de 2 horas de anticipación.' });
+    // Solo bloquear si la reserva tiene horario específico (modo con turnos)
+    // En modo libre se puede cancelar hasta el mismo día
+    if (reserva.rows[0].horario_id && horasRestantes < 2) {
+      return res.status(400).json({ error: 'No podés cancelar con menos de 2 horas de anticipación.' });
+    }
+    // No se puede cancelar reservas de días pasados
+    if (horasRestantes < -12) {
+      return res.status(400).json({ error: 'No podés cancelar una reserva de un día pasado.' });
+    }
     await pool.query("UPDATE reservas SET estado='cancelada' WHERE id=$1", [id]);
     res.json({ mensaje: 'Reserva cancelada.' });
   } catch (error) {
