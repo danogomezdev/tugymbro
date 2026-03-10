@@ -31,37 +31,37 @@ function ModalEjercicio({ ej, onSave, onClose, catalogo }) {
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-end sm:items-center justify-center z-50 p-0 sm:p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <div className="flex items-center justify-between p-4 border-b border-gray-800 sticky top-0 bg-gray-900 z-10">
+      <div className="bg-neutral-950 border border-neutral-800 rounded-t-3xl sm:rounded-2xl w-full sm:max-w-md max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between p-4 border-b border-neutral-800 sticky top-0 bg-neutral-950 z-10">
           <h3 className="font-bold text-white text-sm">{form.nombre || 'Nuevo ejercicio'}</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-white p-1"><X size={18} /></button>
+          <button onClick={onClose} className="text-neutral-500 hover:text-white p-1"><X size={18} /></button>
         </div>
 
         <div className="p-4 space-y-4">
           {/* Selector ejercicio */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Ejercicio *</label>
+            <label className="block text-xs text-neutral-400 mb-1.5">Ejercicio *</label>
             <button onClick={() => setShowCatalogo(!showCatalogo)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-left flex items-center justify-between hover:border-gray-600 transition-colors">
-              <span className={form.nombre ? 'text-white text-sm' : 'text-gray-500 text-sm'}>{form.nombre || 'Seleccionar ejercicio...'}</span>
-              <ChevronDown size={15} className="text-gray-500" />
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2.5 text-left flex items-center justify-between hover:border-gray-600 transition-colors">
+              <span className={form.nombre ? 'text-white text-sm' : 'text-neutral-500 text-sm'}>{form.nombre || 'Seleccionar ejercicio...'}</span>
+              <ChevronDown size={15} className="text-neutral-500" />
             </button>
             {showCatalogo && (
-              <div className="mt-1 bg-gray-800 border border-gray-700 rounded-xl overflow-hidden">
+              <div className="mt-1 bg-neutral-900 border border-neutral-700 rounded-xl overflow-hidden">
                 <div className="p-2">
                   <input autoFocus value={busqueda} onChange={e => setBusqueda(e.target.value)}
-                    className="w-full bg-gray-700 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500"
+                    className="w-full bg-neutral-800 border border-gray-600 rounded-lg px-3 py-1.5 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-600"
                     placeholder="Buscar..." />
                 </div>
                 <div className="max-h-40 overflow-y-auto">
                   {catalogoFiltrado.map(e => (
                     <button key={e.id} onClick={() => { set('catalogo_id', e.id); set('nombre', e.nombre); setShowCatalogo(false); }}
-                      className="w-full text-left px-3 py-2 hover:bg-gray-700 transition-colors">
+                      className="w-full text-left px-3 py-2 hover:bg-neutral-800 transition-colors">
                       <p className="text-white text-sm">{e.nombre}</p>
-                      {e.grupo_muscular && <p className="text-gray-500 text-xs">{e.grupo_muscular}</p>}
+                      {e.grupo_muscular && <p className="text-neutral-500 text-xs">{e.grupo_muscular}</p>}
                     </button>
                   ))}
-                  {catalogoFiltrado.length === 0 && <p className="text-gray-500 text-xs text-center py-3">Sin resultados</p>}
+                  {catalogoFiltrado.length === 0 && <p className="text-neutral-500 text-xs text-center py-3">Sin resultados</p>}
                 </div>
               </div>
             )}
@@ -70,21 +70,21 @@ function ModalEjercicio({ ej, onSave, onClose, catalogo }) {
           {/* Series y reps */}
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Series</label>
+              <label className="block text-xs text-neutral-400 mb-1.5">Series</label>
               <input type="number" value={form.series} onChange={e => set('series', e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-orange-500"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-blue-600"
                 min="1" max="20" />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">{form.unidad_reps === 'seg' ? 'Segundos' : 'Repeticiones'}</label>
+              <label className="block text-xs text-neutral-400 mb-1.5">{form.unidad_reps === 'seg' ? 'Segundos' : 'Repeticiones'}</label>
               <input type="number" value={form.repeticiones} onChange={e => set('repeticiones', e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-orange-500"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-blue-600"
                 min="1" />
             </div>
             <div>
-              <label className="block text-xs text-gray-400 mb-1.5">Unidad</label>
+              <label className="block text-xs text-neutral-400 mb-1.5">Unidad</label>
               <button onClick={() => set('unidad_reps', form.unidad_reps === 'reps' ? 'seg' : 'reps')}
-                className={`w-full h-[38px] rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors border ${form.unidad_reps === 'seg' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+                className={`w-full h-[38px] rounded-xl text-xs font-bold flex items-center justify-center gap-1 transition-colors border ${form.unidad_reps === 'seg' ? 'bg-blue-500/10 text-blue-400 border-blue-500/30' : 'bg-neutral-900 text-neutral-400 border-neutral-700'}`}>
                 {form.unidad_reps === 'seg' ? <><Timer size={11} /> seg</> : '× reps'}
               </button>
             </div>
@@ -92,15 +92,15 @@ function ModalEjercicio({ ej, onSave, onClose, catalogo }) {
 
           {/* Peso */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Peso (kg) — opcional</label>
+            <label className="block text-xs text-neutral-400 mb-1.5">Peso (kg) — opcional</label>
             <input type="number" value={form.peso_kg} onChange={e => set('peso_kg', e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-orange-500"
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-blue-600"
               min="0" step="0.5" placeholder="Sin peso" />
           </div>
 
           {form.peso_kg && (
             <button onClick={() => set('peso_fijo', !form.peso_fijo)}
-              className={`w-full flex items-center gap-2 text-xs px-3 py-2.5 rounded-xl transition-colors border ${form.peso_fijo ? 'bg-orange-500/10 text-orange-400 border-orange-500/30' : 'bg-gray-800 text-gray-400 border-gray-700'}`}>
+              className={`w-full flex items-center gap-2 text-xs px-3 py-2.5 rounded-xl transition-colors border ${form.peso_fijo ? 'bg-blue-950/50 text-blue-400 border-blue-600/30' : 'bg-neutral-900 text-neutral-400 border-neutral-700'}`}>
               {form.peso_fijo ? <Lock size={13} /> : <Unlock size={13} />}
               {form.peso_fijo ? 'Kg fijo — cliente no puede modificarlo' : 'Kg sugerido — cliente puede modificarlo'}
             </button>
@@ -108,19 +108,19 @@ function ModalEjercicio({ ej, onSave, onClose, catalogo }) {
 
           {/* Notas */}
           <div>
-            <label className="block text-xs text-gray-400 mb-1.5">Notas</label>
+            <label className="block text-xs text-neutral-400 mb-1.5">Notas</label>
             <input value={form.notas} onChange={e => set('notas', e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-orange-500"
+              className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-blue-600"
               placeholder="Ej: Espalda recta, codos pegados..." />
           </div>
         </div>
 
-        <div className="p-4 border-t border-gray-800 flex gap-3">
-          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-gray-700 text-gray-400 text-sm font-medium hover:text-white transition-colors">
+        <div className="p-4 border-t border-neutral-800 flex gap-3">
+          <button onClick={onClose} className="flex-1 py-2.5 rounded-xl border border-neutral-700 text-neutral-400 text-sm font-medium hover:text-white transition-colors">
             Cancelar
           </button>
           <button onClick={() => { if (!form.nombre.trim()) { toast.error('Falta el ejercicio'); return; } onSave(form); }}
-            className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold transition-colors">
+            className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors">
             Guardar
           </button>
         </div>
@@ -134,20 +134,20 @@ function ModalCopiarDia({ diaOrigen, dp, onCopiar, onClose }) {
   const destinos = [1, 2, 3].slice(0, dp).filter(d => d !== diaOrigen);
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4">
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl w-full max-w-xs p-5">
+      <div className="bg-neutral-950 border border-neutral-800 rounded-2xl w-full max-w-xs p-5">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-white text-sm">Copiar {DIAS_LABEL[diaOrigen]} a...</h3>
-          <button onClick={onClose} className="text-gray-500 hover:text-white"><X size={16} /></button>
+          <button onClick={onClose} className="text-neutral-500 hover:text-white"><X size={16} /></button>
         </div>
         <div className="space-y-2">
           {destinos.map(d => (
             <button key={d} onClick={() => onCopiar(d)}
-              className="w-full py-3 rounded-xl bg-gray-800 hover:bg-orange-500 text-white text-sm font-medium transition-colors">
+              className="w-full py-3 rounded-xl bg-neutral-900 hover:bg-blue-600 text-white text-sm font-medium transition-colors">
               {DIAS_LABEL[d]}
             </button>
           ))}
         </div>
-        <button onClick={onClose} className="w-full mt-3 py-2.5 rounded-xl border border-gray-700 text-gray-400 text-sm hover:text-white transition-colors">
+        <button onClick={onClose} className="w-full mt-3 py-2.5 rounded-xl border border-neutral-700 text-neutral-400 text-sm hover:text-white transition-colors">
           Cancelar
         </button>
       </div>
@@ -342,26 +342,26 @@ export default function RutinaCliente() {
   const dp = { '1_dia': 1, '2_dias': 2, '3_dias': 3 }[cliente?.plan] || 3;
 
   return (
-    <div className="min-h-screen bg-gray-950 pb-10">
+    <div className="min-h-screen bg-black pb-10">
       {/* Header */}
-      <header className="bg-gray-900 border-b border-gray-800 sticky top-0 z-40">
+      <header className="bg-neutral-950 border-b border-neutral-800 sticky top-0 z-40">
         <div className="px-4 py-3 max-w-3xl mx-auto flex items-center justify-between gap-3">
           <div className="flex items-center gap-3 min-w-0">
-            <button onClick={() => navigate(`/gym/${gymSlug}/admin/rutinas`)} className="text-gray-400 hover:text-white">
+            <button onClick={() => navigate(`/gym/${gymSlug}/admin/rutinas`)} className="text-neutral-400 hover:text-white">
               <ArrowLeft size={18} />
             </button>
             <div className="min-w-0">
               <p className="text-white font-bold text-sm truncate">{cliente ? `${cliente.nombre} ${cliente.apellido}` : 'Cargando...'}</p>
-              {cliente && <p className="text-gray-500 text-xs">Plan {cliente.plan?.replace('_', ' ')}</p>}
+              {cliente && <p className="text-neutral-500 text-xs">Plan {cliente.plan?.replace('_', ' ')}</p>}
             </div>
           </div>
           <div className="flex items-center gap-1.5 flex-shrink-0">
             <button onClick={() => { setMostrarPlantillas(!mostrarPlantillas); setMostrarCatalogo(false); }}
-              className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${mostrarPlantillas ? 'bg-orange-500 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
+              className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${mostrarPlantillas ? 'bg-blue-600 text-white' : 'bg-neutral-900 text-neutral-400 hover:text-white'}`}>
               <BookOpen size={11} /> Plantillas
             </button>
             <button onClick={() => { setMostrarCatalogo(!mostrarCatalogo); setMostrarPlantillas(false); }}
-              className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${mostrarCatalogo ? 'bg-orange-500 text-white' : 'bg-gray-800 text-gray-400 hover:text-white'}`}>
+              className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors ${mostrarCatalogo ? 'bg-blue-600 text-white' : 'bg-neutral-900 text-neutral-400 hover:text-white'}`}>
               <Settings size={11} /> Catálogo
             </button>
           </div>
@@ -372,25 +372,25 @@ export default function RutinaCliente() {
 
         {/* Panel plantillas */}
         {mostrarPlantillas && (
-          <div className="bg-gray-900 border border-orange-500/20 rounded-2xl p-4 mb-4">
+          <div className="bg-neutral-950 border border-blue-600/20 rounded-2xl p-4 mb-4">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="font-bold text-white text-sm flex items-center gap-2"><BookOpen size={14} className="text-orange-500" /> Plantillas</h3>
-              <button onClick={() => setModalPlantilla(true)} className="text-xs bg-orange-500 hover:bg-orange-600 text-white px-3 py-1.5 rounded-lg transition-colors">
+              <h3 className="font-bold text-white text-sm flex items-center gap-2"><BookOpen size={14} className="text-blue-400" /> Plantillas</h3>
+              <button onClick={() => setModalPlantilla(true)} className="text-xs bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded-lg transition-colors">
                 + Guardar actual
               </button>
             </div>
             {plantillas.length === 0
-              ? <p className="text-gray-500 text-xs text-center py-3">No tenés plantillas todavía</p>
+              ? <p className="text-neutral-500 text-xs text-center py-3">No tenés plantillas todavía</p>
               : <div className="space-y-2">
                 {plantillas.map(p => (
-                  <div key={p.id} className="flex items-center justify-between bg-gray-800 rounded-xl px-3 py-2.5">
+                  <div key={p.id} className="flex items-center justify-between bg-neutral-900 rounded-xl px-3 py-2.5">
                     <div>
                       <p className="text-white text-sm font-medium">{p.nombre}</p>
-                      <p className="text-gray-500 text-xs capitalize">{p.nivel} · {p.total_ejercicios} ejercicios</p>
+                      <p className="text-neutral-500 text-xs capitalize">{p.nivel} · {p.total_ejercicios} ejercicios</p>
                     </div>
                     <div className="flex gap-2">
-                      <button onClick={() => cargarPlantilla(p.id)} className="text-xs bg-orange-500/10 text-orange-400 hover:bg-orange-500 hover:text-white px-3 py-1.5 rounded-lg transition-colors font-medium">Cargar</button>
-                      <button onClick={() => eliminarPlantilla(p.id)} className="text-gray-600 hover:text-red-400 p-1"><Trash2 size={13} /></button>
+                      <button onClick={() => cargarPlantilla(p.id)} className="text-xs bg-blue-950/50 text-blue-400 hover:bg-blue-600 hover:text-white px-3 py-1.5 rounded-lg transition-colors font-medium">Cargar</button>
+                      <button onClick={() => eliminarPlantilla(p.id)} className="text-neutral-600 hover:text-red-400 p-1"><Trash2 size={13} /></button>
                     </div>
                   </div>
                 ))}
@@ -401,21 +401,21 @@ export default function RutinaCliente() {
 
         {/* Panel catálogo */}
         {mostrarCatalogo && (
-          <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4">
-            <h3 className="font-bold text-white text-sm mb-3 flex items-center gap-2"><Settings size={14} className="text-orange-500" /> Catálogo de ejercicios</h3>
+          <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 mb-4">
+            <h3 className="font-bold text-white text-sm mb-3 flex items-center gap-2"><Settings size={14} className="text-blue-400" /> Catálogo de ejercicios</h3>
             <div className="flex gap-2 mb-3">
               <input value={nuevoEjercicio} onChange={e => setNuevoEjercicio(e.target.value)}
                 onKeyDown={e => e.key === 'Enter' && crearEnCatalogo()}
-                className="flex-1 bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-orange-500"
+                className="flex-1 bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-sm text-white placeholder-gray-500 outline-none focus:border-blue-600"
                 placeholder="Nuevo ejercicio..." />
-              <button onClick={crearEnCatalogo} className="bg-orange-500 hover:bg-orange-600 text-white px-4 rounded-xl text-sm font-bold transition-colors">+ Crear</button>
+              <button onClick={crearEnCatalogo} className="bg-blue-600 hover:bg-blue-700 text-white px-4 rounded-xl text-sm font-bold transition-colors">+ Crear</button>
             </div>
             <div className="space-y-1 max-h-48 overflow-y-auto">
               {catalogo.map(e => (
-                <div key={e.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-gray-800">
-                  <span className={`text-sm ${e.activo !== false ? 'text-white' : 'text-gray-600 line-through'}`}>{e.nombre}</span>
+                <div key={e.id} className="flex items-center justify-between py-1.5 px-2 rounded-lg hover:bg-neutral-900">
+                  <span className={`text-sm ${e.activo !== false ? 'text-white' : 'text-neutral-600 line-through'}`}>{e.nombre}</span>
                   <button onClick={() => toggleCatalogo(e.id)}
-                    className={`text-xs px-2 py-1 rounded-lg transition-colors ${e.activo !== false ? 'bg-green-500/10 text-green-400' : 'bg-gray-700 text-gray-500'}`}>
+                    className={`text-xs px-2 py-1 rounded-lg transition-colors ${e.activo !== false ? 'bg-green-500/10 text-green-400' : 'bg-neutral-800 text-neutral-500'}`}>
                     {e.activo !== false ? 'Activo' : 'Inactivo'}
                   </button>
                 </div>
@@ -425,34 +425,34 @@ export default function RutinaCliente() {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-1 mb-5 bg-gray-900 p-1 rounded-xl">
+        <div className="flex gap-1 mb-5 bg-neutral-950 p-1 rounded-xl">
           {[
             { key: 'rutina', label: 'Rutina activa', icon: Dumbbell },
             { key: 'historial', label: `Historial (${historialRutinas.length})`, icon: Eye },
           ].map(({ key, label, icon: Icon }) => (
             <button key={key} onClick={() => setTab(key)}
-              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${tab === key ? 'bg-orange-500 text-white' : 'text-gray-400 hover:text-white'}`}>
+              className={`flex-1 flex items-center justify-center gap-1.5 py-2.5 rounded-lg text-xs font-medium transition-colors ${tab === key ? 'bg-blue-600 text-white' : 'text-neutral-400 hover:text-white'}`}>
               <Icon size={12} /> {label}
             </button>
           ))}
         </div>
 
         {cargando ? (
-          <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-gray-800 rounded-xl animate-pulse" />)}</div>
+          <div className="space-y-3">{[1, 2, 3].map(i => <div key={i} className="h-16 bg-neutral-900 rounded-xl animate-pulse" />)}</div>
 
         ) : tab === 'rutina' ? (
           <div>
             {/* Nombre rutina */}
-            <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 mb-4 space-y-3">
+            <div className="bg-neutral-950 border border-neutral-800 rounded-2xl p-4 mb-4 space-y-3">
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Nombre</label>
+                <label className="block text-xs text-neutral-400 mb-1">Nombre</label>
                 <input value={rutinaNombre} onChange={e => setRutinaNombre(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-orange-500" />
+                  className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-blue-600" />
               </div>
               <div>
-                <label className="block text-xs text-gray-400 mb-1">Descripción (opcional)</label>
+                <label className="block text-xs text-neutral-400 mb-1">Descripción (opcional)</label>
                 <input value={rutinaDesc} onChange={e => setRutinaDesc(e.target.value)}
-                  className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-orange-500"
+                  className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2 text-white text-sm outline-none focus:border-blue-600"
                   placeholder="Ej: Fuerza + hipertrofia 3 días" />
               </div>
             </div>
@@ -461,7 +461,7 @@ export default function RutinaCliente() {
             <div className="flex gap-1.5 mb-1">
               {[1, 2, 3].slice(0, dp).map(d => (
                 <button key={d} onClick={() => setDiaActivo(d)}
-                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors ${diaActivo === d ? 'bg-orange-500 text-white' : 'bg-gray-900 border border-gray-800 text-gray-400 hover:text-white'}`}>
+                  className={`flex-1 py-2 rounded-xl text-xs font-bold transition-colors ${diaActivo === d ? 'bg-blue-600 text-white' : 'bg-neutral-950 border border-neutral-800 text-neutral-400 hover:text-white'}`}>
                   {DIAS_LABEL[d]}
                 </button>
               ))}
@@ -471,7 +471,7 @@ export default function RutinaCliente() {
             {dp > 1 && (
               <div className="flex justify-end mb-3 mt-1.5">
                 <button onClick={() => setModalCopiar(true)}
-                  className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-orange-400 transition-colors">
+                  className="flex items-center gap-1.5 text-xs text-neutral-500 hover:text-blue-400 transition-colors">
                   <Copy size={12} /> Copiar {DIAS_LABEL[diaActivo]} a otro día
                 </button>
               </div>
@@ -480,15 +480,15 @@ export default function RutinaCliente() {
             {/* Lista ejercicios */}
             <div className="space-y-2 mb-3">
               {dias[diaActivo]?.map((ej, idx) => (
-                <div key={ej._key} className="bg-gray-900 border border-gray-800 rounded-2xl p-3 flex items-center gap-3">
-                  <div className="w-6 h-6 rounded-lg bg-orange-500/10 flex items-center justify-center flex-shrink-0">
-                    <span className="text-orange-500 text-xs font-bold">{idx + 1}</span>
+                <div key={ej._key} className="bg-neutral-950 border border-neutral-800 rounded-2xl p-3 flex items-center gap-3">
+                  <div className="w-6 h-6 rounded-lg bg-blue-950/50 flex items-center justify-center flex-shrink-0">
+                    <span className="text-blue-400 text-xs font-bold">{idx + 1}</span>
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className={`text-sm font-semibold truncate ${ej.nombre ? 'text-white' : 'text-gray-600 italic'}`}>
+                    <p className={`text-sm font-semibold truncate ${ej.nombre ? 'text-white' : 'text-neutral-600 italic'}`}>
                       {ej.nombre || 'Sin nombre'}
                     </p>
-                    <p className="text-gray-500 text-xs">
+                    <p className="text-neutral-500 text-xs">
                       {ej.series}×{ej.repeticiones} {ej.unidad_reps === 'seg' ? 'seg' : 'reps'}
                       {ej.peso_kg ? ` · ${ej.peso_kg}kg` : ''}
                       {ej.notas ? ` · ${ej.notas}` : ''}
@@ -496,12 +496,12 @@ export default function RutinaCliente() {
                   </div>
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button onClick={() => setModalEj({ dia: diaActivo, idx, ej })}
-                      className="text-xs bg-gray-800 hover:bg-gray-700 text-gray-400 hover:text-white px-2.5 py-1.5 rounded-lg transition-colors">
+                      className="text-xs bg-neutral-900 hover:bg-neutral-800 text-neutral-400 hover:text-white px-2.5 py-1.5 rounded-lg transition-colors">
                       Editar
                     </button>
                     <button onClick={() => eliminarEjercicio(diaActivo, idx)}
                       disabled={dias[diaActivo].length === 1}
-                      className="text-gray-700 hover:text-red-400 p-1.5 transition-colors disabled:opacity-30">
+                      className="text-neutral-700 hover:text-red-400 p-1.5 transition-colors disabled:opacity-30">
                       <Trash2 size={14} />
                     </button>
                   </div>
@@ -510,17 +510,17 @@ export default function RutinaCliente() {
             </div>
 
             <button onClick={() => agregarEjercicio(diaActivo)}
-              className="w-full py-2.5 rounded-xl border border-dashed border-gray-700 hover:border-orange-500 text-gray-500 hover:text-orange-400 text-sm flex items-center justify-center gap-2 transition-colors mb-5">
+              className="w-full py-2.5 rounded-xl border border-dashed border-neutral-700 hover:border-blue-600 text-neutral-500 hover:text-blue-400 text-sm flex items-center justify-center gap-2 transition-colors mb-5">
               <Plus size={15} /> Agregar ejercicio
             </button>
 
             <div className="flex gap-3">
               <button onClick={() => guardarRutina(false)} disabled={guardando}
-                className="flex-1 py-3 rounded-xl bg-orange-500 hover:bg-orange-600 text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
+                className="flex-1 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-bold text-sm flex items-center justify-center gap-2 transition-colors disabled:opacity-50">
                 <Save size={15} /> {guardando ? 'Guardando...' : 'Guardar rutina'}
               </button>
               <button onClick={() => guardarRutina(true)} disabled={guardando}
-                className="py-3 px-4 rounded-xl border border-gray-700 text-gray-400 hover:text-white text-sm font-medium flex items-center gap-2 transition-colors">
+                className="py-3 px-4 rounded-xl border border-neutral-700 text-neutral-400 hover:text-white text-sm font-medium flex items-center gap-2 transition-colors">
                 <PlusCircle size={15} /> Nueva
               </button>
             </div>
@@ -529,30 +529,30 @@ export default function RutinaCliente() {
         ) : (
           <div>
             {historialRutinas.length === 0
-              ? <div className="bg-gray-900 border border-gray-800 rounded-2xl text-center py-12">
-                <Eye className="text-gray-700 mx-auto mb-3" size={36} />
-                <p className="text-gray-500 text-sm">No hay rutinas anteriores</p>
+              ? <div className="bg-neutral-950 border border-neutral-800 rounded-2xl text-center py-12">
+                <Eye className="text-neutral-700 mx-auto mb-3" size={36} />
+                <p className="text-neutral-500 text-sm">No hay rutinas anteriores</p>
               </div>
               : <div className="space-y-2">
                 {historialRutinas.map(r => (
-                  <div key={r.id} className="bg-gray-900 border border-gray-800 rounded-2xl overflow-hidden">
+                  <div key={r.id} className="bg-neutral-950 border border-neutral-800 rounded-2xl overflow-hidden">
                     <div className="flex items-center justify-between p-3 cursor-pointer" onClick={() => verRutinaArchivada(r.id)}>
                       <div>
                         <p className="font-semibold text-white text-sm">{r.nombre}</p>
-                        <p className="text-gray-500 text-xs">{formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}</p>
+                        <p className="text-neutral-500 text-xs">{formatFecha(r.fecha_inicio)} → {formatFecha(r.fecha_fin)}</p>
                       </div>
-                      {rutinaExpandida === r.id ? <ChevronUp size={15} className="text-gray-600" /> : <ChevronDown size={15} className="text-gray-600" />}
+                      {rutinaExpandida === r.id ? <ChevronUp size={15} className="text-neutral-600" /> : <ChevronDown size={15} className="text-neutral-600" />}
                     </div>
                     {rutinaExpandida === r.id && rutinaArchivadaData[r.id] && (
-                      <div className="border-t border-gray-800 px-3 py-3 space-y-3">
+                      <div className="border-t border-neutral-800 px-3 py-3 space-y-3">
                         {Object.entries(rutinaArchivadaData[r.id].dias || {}).map(([dia, ejs]) => (
                           <div key={dia}>
-                            <p className="text-orange-500 text-xs font-bold mb-1.5">{DIAS_LABEL[dia] || `Día ${dia}`}</p>
+                            <p className="text-blue-400 text-xs font-bold mb-1.5">{DIAS_LABEL[dia] || `Día ${dia}`}</p>
                             <div className="space-y-1">
                               {ejs.map((e, i) => (
                                 <div key={i} className="flex items-center justify-between text-xs">
-                                  <span className="text-gray-400">{e.nombre}</span>
-                                  <span className="text-gray-600">{e.series}×{e.repeticiones}{e.peso_kg ? ` · ${e.peso_kg}kg` : ''}</span>
+                                  <span className="text-neutral-400">{e.nombre}</span>
+                                  <span className="text-neutral-600">{e.series}×{e.repeticiones}{e.peso_kg ? ` · ${e.peso_kg}kg` : ''}</span>
                                 </div>
                               ))}
                             </div>
@@ -591,25 +591,25 @@ export default function RutinaCliente() {
       {/* Modal guardar plantilla */}
       {modalPlantilla && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4">
-          <div className="bg-gray-900 rounded-2xl p-6 w-full max-w-sm border border-gray-800">
+          <div className="bg-neutral-950 rounded-2xl p-6 w-full max-w-sm border border-neutral-800">
             <div className="flex items-center justify-between mb-4">
               <h3 className="font-bold text-white text-sm">Guardar como plantilla</h3>
-              <button onClick={() => setModalPlantilla(false)} className="text-gray-500 hover:text-white"><X size={18} /></button>
+              <button onClick={() => setModalPlantilla(false)} className="text-neutral-500 hover:text-white"><X size={18} /></button>
             </div>
             <div className="space-y-3">
               <input value={nuevaPlantillaNombre} onChange={e => setNuevaPlantillaNombre(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none focus:border-orange-500"
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none focus:border-blue-600"
                 placeholder="Nombre de la plantilla..." />
               <select value={nuevaPlantillaNivel} onChange={e => setNuevaPlantillaNivel(e.target.value)}
-                className="w-full bg-gray-800 border border-gray-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none focus:border-orange-500">
+                className="w-full bg-neutral-900 border border-neutral-700 rounded-xl px-3 py-2.5 text-white text-sm outline-none focus:border-blue-600">
                 <option value="principiante">Principiante</option>
                 <option value="intermedio">Intermedio</option>
                 <option value="avanzado">Avanzado</option>
               </select>
             </div>
             <div className="flex gap-3 mt-4">
-              <button onClick={() => setModalPlantilla(false)} className="flex-1 py-2.5 rounded-xl border border-gray-700 text-gray-400 text-sm hover:text-white transition-colors">Cancelar</button>
-              <button onClick={guardarComoPlantilla} className="flex-1 py-2.5 rounded-xl bg-orange-500 hover:bg-orange-600 text-white text-sm font-bold transition-colors">Guardar</button>
+              <button onClick={() => setModalPlantilla(false)} className="flex-1 py-2.5 rounded-xl border border-neutral-700 text-neutral-400 text-sm hover:text-white transition-colors">Cancelar</button>
+              <button onClick={guardarComoPlantilla} className="flex-1 py-2.5 rounded-xl bg-blue-600 hover:bg-blue-700 text-white text-sm font-bold transition-colors">Guardar</button>
             </div>
           </div>
         </div>
